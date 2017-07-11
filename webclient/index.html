@@ -1,0 +1,26 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Videoso</title>
+	<link href="https://unpkg.com/video.js/dist/video-js.css" rel="stylesheet">
+</head>
+
+<body>
+	<h1>Videoso</h1>
+	<hr>
+	<video id="mainVideo" width="480" height="360" class="video-js vjs-default-skin vjs-big-play-centered" controls></video>
+
+	<script src="https://unpkg.com/video.js/dist/video.js"></script>
+	<script src="//cdn.dashjs.org/latest/dash.all.debug.js"></script>
+	<script src="https://unpkg.com/videojs-contrib-dash/dist/videojs-dash.js"></script>
+	<script>
+		var player = videojs('mainVideo');
+		player.src({
+			src: 'http://dev-videoso/sample.mpd',
+			type: 'application/dash+xml'
+		});
+	</script>
+</body>
+</html>
