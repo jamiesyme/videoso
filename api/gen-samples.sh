@@ -12,8 +12,9 @@
 #        output.mp4
 
 
-input_name="sample.mp4"
-output_name_pre="sample-"
+cd $1
+input_name="$2.mp4"
+output_name_pre="$2-"
 output_name_post=".mp4"
 framerate=30
 
@@ -28,9 +29,9 @@ function run_ffmpeg () {
 	ffmpeg -i $input_name -pix_fmt yuv420p -movflags +faststart -c:v libx264 -r $framerate -crf $3 -vf "scale=w=$1:h=$2:force_original_aspect_ratio=decrease, scale=w=trunc(iw/2)*2:h=trunc(ih/2)*2" -x264opts "keyint=$gop_size:min-keyint=$gop_size:no-scenecut" -c:a copy "${output_name_pre}${2}-${3}${output_name_post}"
 }
 
-run_ffmpeg 480 360 17 
-run_ffmpeg 480 360 23 
-run_ffmpeg 480 360 29 
+run_ffmpeg 480 360 17
+run_ffmpeg 480 360 23
+run_ffmpeg 480 360 29
 run_ffmpeg 854 480 17
 run_ffmpeg 854 480 23
 run_ffmpeg 854 480 29

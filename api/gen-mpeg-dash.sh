@@ -1,8 +1,8 @@
 #!/bin/bash
 
-output_name_pre="sample"
-input_name_pre="sample-"
-segment_name_pre="sample-segment_"
+cd $1
+output_name_pre="$2"
+input_name_pre="$2-"
 
 # If you change this, update gop_size in gen-samples.sh.
 segment_duration_ms=2000

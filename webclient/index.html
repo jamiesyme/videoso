@@ -1,33 +1,54 @@
 <!doctype html>
 
 <html lang="en">
-<head>
-	<meta charset="utf-8">
-	<title>Videoso</title>
-	<link href="https://unpkg.com/video.js/dist/video-js.css" rel="stylesheet">
-</head>
+	<head>
+		<meta charset="utf-8">
+		<title>Videoso</title>
+		<link href="https://unpkg.com/video.js/dist/video-js.css" rel="stylesheet">
+	</head>
 
-<body>
-	<h1>Videoso</h1>
-	<hr>
-	<p>Upload a new video:</p>
-	<form enctype="multipart/form-data" action="http://dev-videoso:8001/upload-video" method="POST">
-		<input type="file" accept="video/*" name="videoFile" id="videoFileInput">
-		<br>
-		<input type="submit" value="Upload">
-	</form>
-	<hr>
-	<video id="mainVideo" width="480" height="360" class="video-js vjs-default-skin vjs-big-play-centered" controls></video>
+	<body>
+		<h1>Videoso</h1>
+		<hr>
+		<p>Upload a new video:</p>
+		<form enctype="multipart/form-data" action="http://dev-videoso:8001/videos" method="POST">
+			<input type="file" accept="video/*" name="videoFile" id="videoFileInput">
+			<br>
+			<input type="submit" value="Upload">
+		</form>
+		<hr>
+		<ul id="videoList">
+		</ul>
 
-	<script src="https://unpkg.com/video.js/dist/video.js"></script>
-	<script src="//cdn.dashjs.org/latest/dash.all.debug.js"></script>
-	<script src="https://unpkg.com/videojs-contrib-dash/dist/videojs-dash.js"></script>
-	<script>
-		var player = videojs('mainVideo');
-		player.src({
-			src: 'https://s3-us-west-2.amazonaws.com/videoso-dev/sample_dash.mpd',
-			type: 'application/dash+xml'
-		});
-	</script>
-</body>
+		<script src="https://unpkg.com/video.js/dist/video.js"></script>
+		<script src="//cdn.dashjs.org/latest/dash.all.debug.js"></script>
+		<script src="https://unpkg.com/videojs-contrib-dash/dist/videojs-dash.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+		<script>
+		$.getJSON('http://dev-videoso:8001/videos')
+			.done(function(data) {
+				$.each(data.videos, function(i, video) {
+					var docId = 'v_' + video.videoId
+					$('<video>')
+						.attr('id', docId)
+						.attr('width', 480)
+						.attr('height', 360)
+						.attr('controls', true)
+						.addClass('video-js')
+						.addClass('vjs-default-skin')
+						.addClass('vjs-big-play-centered')
+						.appendTo('#videoList')
+					var player = videojs(docId)
+					player.src({
+						src: video.videoMpdUrl,
+						type: 'application/dash+xml'
+					});
+				});
+			})
+			.fail(function(jqxhr, textStatus, error) {
+				var err = textStatus + ", " + error;
+				console.log("Failed to request videos: " + err);
+			});
+		</script>
+	</body>
 </html>
