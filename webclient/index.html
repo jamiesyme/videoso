@@ -11,8 +11,10 @@
 		<h1>Videoso</h1>
 		<hr>
 		<p>Upload a new video:</p>
-		<form enctype="multipart/form-data" action="http://dev-videoso:8001/videos" method="POST">
-			<input type="file" accept="video/*" name="videoFile" id="videoFileInput">
+		<form id="uploadForm">
+			<input id="videoTitleInput" type="text" name="title" placeholder="Title">
+			<br>
+			<input id="videoFileInput" type="file" accept="video/*" name="videoFile">
 			<br>
 			<input type="submit" value="Upload">
 		</form>
@@ -25,10 +27,28 @@
 		<script src="https://unpkg.com/videojs-contrib-dash/dist/videojs-dash.js"></script>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 		<script>
+		$('#uploadForm').submit(function(e) {
+			e.preventDefault();
+			var formData = new FormData($('#uploadForm')[0]);
+			$.ajax({
+				url: 'http://dev-videoso:8001/videos',
+				type: 'post',
+				data: formData,
+				processData: false,
+				contentType: false,
+				success: function() {
+					$('#uploadForm')[0].reset();
+				}
+			});
+		});
+		</script>
+		<script>
 		$.getJSON('http://dev-videoso:8001/videos')
 			.done(function(data) {
 				$.each(data.videos, function(i, video) {
 					var docId = 'v_' + video.videoId
+					var div = $('<div>').appendTo('#videoList');
+					$('<h2>').text(video.title).appendTo(div);
 					$('<video>')
 						.attr('id', docId)
 						.attr('width', 480)
@@ -37,7 +57,7 @@
 						.addClass('video-js')
 						.addClass('vjs-default-skin')
 						.addClass('vjs-big-play-centered')
-						.appendTo('#videoList')
+						.appendTo(div)
 					var player = videojs(docId)
 					player.src({
 						src: video.videoMpdUrl,

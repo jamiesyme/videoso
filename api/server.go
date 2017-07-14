@@ -206,11 +206,12 @@ func uploadVideo(ctx *serverContext, w http.ResponseWriter, r *http.Request, _ h
 	log.Println("uploaded to s3")
 
 	log.Println("saving to postgres...")
+	videoTitle := r.FormValue("title")
 	queryStr := "INSERT INTO videos(video_id, title, original_video_s3_url, video_mpd_s3_url) VALUES($1, $2, $3, $4);"
 	_, err = ctx.db.Exec(
 		queryStr,
 		videoId,
-		"New Video",
+		videoTitle,
 		originalVideoUrl,
 		videoMpdUrl,
 	)
@@ -222,6 +223,7 @@ func uploadVideo(ctx *serverContext, w http.ResponseWriter, r *http.Request, _ h
 	log.Println("saved to postgres")
 
 	log.Println("new upload successful")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
 }
 
