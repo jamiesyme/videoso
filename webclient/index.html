@@ -16,7 +16,7 @@
 			<br>
 			<input id="videoFileInput" type="file" accept="video/*" name="videoFile">
 			<br>
-			<input type="submit" value="Upload">
+			<input id="videoSubmit" type="submit" value="Upload">
 		</form>
 		<hr>
 		<ul id="videoList">
@@ -27,8 +27,42 @@
 		<script src="https://unpkg.com/videojs-contrib-dash/dist/videojs-dash.js"></script>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 		<script>
+		function videoLiFromJson(parentElement, video) {
+			var docId = 'v_' + video.videoId;
+			$('<h2>')
+				.text(video.title)
+				.appendTo(parentElement);
+			$('<video>')
+				.attr('id', docId)
+				.attr('width', 480)
+				.attr('height', 360)
+				.attr('controls', true)
+				.addClass('video-js')
+				.addClass('vjs-default-skin')
+				.addClass('vjs-big-play-centered')
+				.appendTo(parentElement);
+			var player = videojs(docId);
+			player.src({
+				src: video.videoMpdUrl,
+				type: 'application/dash+xml'
+			});
+		}
+
 		$('#uploadForm').submit(function(e) {
 			e.preventDefault();
+
+			function lockForm() {
+				$('#videoSubmit')
+					.prop('disabled', true)
+					.val('Uploading...');
+			}
+			function unlockForm() {
+				$('#videoSubmit')
+					.prop('disabled', false)
+					.val('Upload');
+			}
+
+			lockForm();
 			var formData = new FormData($('#uploadForm')[0]);
 			$.ajax({
 				url: 'http://dev-videoso:8001/videos',
@@ -36,33 +70,24 @@
 				data: formData,
 				processData: false,
 				contentType: false,
-				success: function() {
+				success: function(data) {
 					$('#uploadForm')[0].reset();
+					unlockForm();
+					var $li = $('<li>').prependTo('#videoList');
+					videoLiFromJson($li, data.video);
+				},
+				error: function() {
+					alert('Upload failed. Please try again later.');
+					unlockForm();
 				}
 			});
 		});
-		</script>
-		<script>
+
 		$.getJSON('http://dev-videoso:8001/videos')
 			.done(function(data) {
 				$.each(data.videos, function(i, video) {
-					var docId = 'v_' + video.videoId
-					var div = $('<div>').appendTo('#videoList');
-					$('<h2>').text(video.title).appendTo(div);
-					$('<video>')
-						.attr('id', docId)
-						.attr('width', 480)
-						.attr('height', 360)
-						.attr('controls', true)
-						.addClass('video-js')
-						.addClass('vjs-default-skin')
-						.addClass('vjs-big-play-centered')
-						.appendTo(div)
-					var player = videojs(docId)
-					player.src({
-						src: video.videoMpdUrl,
-						type: 'application/dash+xml'
-					});
+					var $li = $('<li>').appendTo('#videoList');
+					videoLiFromJson($li, video);
 				});
 			})
 			.fail(function(jqxhr, textStatus, error) {

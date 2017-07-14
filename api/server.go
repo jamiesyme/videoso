@@ -208,6 +208,7 @@ func uploadVideo(ctx *serverContext, w http.ResponseWriter, r *http.Request, _ h
 
 	log.Println("saving to postgres...")
 	videoTitle := r.FormValue("title")
+	videoCreatedAt := time.Now()
 	queryStr := "INSERT INTO videos(video_id, title, original_video_s3_url, video_mpd_s3_url, created_at) VALUES($1, $2, $3, $4, $5);"
 	_, err = ctx.db.Exec(
 		queryStr,
@@ -215,7 +216,7 @@ func uploadVideo(ctx *serverContext, w http.ResponseWriter, r *http.Request, _ h
 		videoTitle,
 		originalVideoUrl,
 		videoMpdUrl,
-		"'now'",
+		videoCreatedAt.UTC(),
 	)
 	if err != nil {
 		log.Println("failed to save to postgres")
@@ -225,8 +226,23 @@ func uploadVideo(ctx *serverContext, w http.ResponseWriter, r *http.Request, _ h
 	log.Println("saved to postgres")
 
 	log.Println("new upload successful")
+	videoJson := make(map[string]interface{})
+	videoJson["videoId"] = videoId
+	videoJson["title"] = videoTitle
+	videoJson["videoMpdUrl"] = videoMpdUrl
+	videoJson["createdAt"] = videoCreatedAt.Unix()
+	resJson := make(map[string]interface{})
+	resJson["video"] = videoJson
+	jsonStr, err := json.Marshal(resJson)
+	if err != nil {
+		log.Println("failed to marshal json response")
+		log.Println(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonStr)
 }
 
 func getVideos(ctx *serverContext, w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
