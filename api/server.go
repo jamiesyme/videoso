@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -207,13 +208,14 @@ func uploadVideo(ctx *serverContext, w http.ResponseWriter, r *http.Request, _ h
 
 	log.Println("saving to postgres...")
 	videoTitle := r.FormValue("title")
-	queryStr := "INSERT INTO videos(video_id, title, original_video_s3_url, video_mpd_s3_url) VALUES($1, $2, $3, $4);"
+	queryStr := "INSERT INTO videos(video_id, title, original_video_s3_url, video_mpd_s3_url, created_at) VALUES($1, $2, $3, $4, $5);"
 	_, err = ctx.db.Exec(
 		queryStr,
 		videoId,
 		videoTitle,
 		originalVideoUrl,
 		videoMpdUrl,
+		"'now'",
 	)
 	if err != nil {
 		log.Println("failed to save to postgres")
@@ -228,7 +230,10 @@ func uploadVideo(ctx *serverContext, w http.ResponseWriter, r *http.Request, _ h
 }
 
 func getVideos(ctx *serverContext, w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	queryStr := "SELECT * FROM videos;"
+	queryStr := "" +
+		" SELECT video_id, title, video_mpd_s3_url, created_at" +
+		" FROM videos" +
+		" ORDER BY created_at DESC;"
 	rows, err := ctx.db.Query(queryStr)
 	if err != nil {
 		log.Println("failed to query videos")
@@ -242,27 +247,27 @@ func getVideos(ctx *serverContext, w http.ResponseWriter, r *http.Request, _ htt
 	videosJson["videos"] = make([]interface{}, 0)
 	for rows.Next() {
 		var (
-			videoId          string
-			title            string
-			originalVideoUrl string
-			videoMpdUrl      string
+			videoId     string
+			title       string
+			videoMpdUrl string
+			createdAt   time.Time
 		)
 		err = rows.Scan(
 			&videoId,
 			&title,
-			&originalVideoUrl,
 			&videoMpdUrl,
+			&createdAt,
 		)
 		if err != nil {
 			log.Println("failed to scan video row")
 			log.Println(err.Error())
 			continue
 		}
-		videoJson := make(map[string]string)
+		videoJson := make(map[string]interface{})
 		videoJson["videoId"] = videoId
 		videoJson["title"] = title
-		videoJson["originalVideoUrl"] = originalVideoUrl
 		videoJson["videoMpdUrl"] = videoMpdUrl
+		videoJson["createdAt"] = createdAt.Unix()
 		videosJson["videos"] = append(videosJson["videos"].([]interface{}), videoJson)
 	}
 	err = rows.Err()
