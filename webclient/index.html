@@ -75,12 +75,12 @@
 			<div class="row">
 				<section class="col-sm-6">
 					<h1>Introduction</h1>
-					<p>This is a (very) early prototype of Videoso, a video streaming platform.</p>
-					<p>When a new video is uploaded, it will be processed using the following steps:</p>
+					<p>This is an early prototype of Videoso, a video streaming platform.</p>
+					<p>When a new video is uploaded, it will be processed as follows:</p>
 					<ol>
-						<li>Transcode the video into various resolutions (320p, <s>480p</s>, <s>720p</s>, and <s>1080p</s>) and bitrates using FFmpeg.</li>
-						<li>Generate the MPEG-DASH files required for video streaming using the transcoded video files and MP4Box.</li>
-						<li>Upload the MPEG-DASH files to Amazon S3, and save the video information to Postgres.</li>
+						<li>Transcode the video into various resolutions (320p, <s>480p</s>, <s>720p</s>, and <s>1080p</s>) and various bitrates using <a href="https://ffmpeg.org/">FFmpeg</a>.</li>
+						<li>Generate the MPEG-DASH files required for video streaming using the transcoded video files and <a href="https://gpac.wp.imt.fr/mp4box/">MP4Box</a>.</li>
+						<li>Upload the MPEG-DASH files to <a href="https://aws.amazon.com/s3/">Amazon S3</a>, and save the video information to <a href="https://www.postgresql.org/">Postgres</a>.</li>
 					</ol>
 					<p>For more details, check out the <a href="https://github.com/jamiesyme/videoso">repo on Github</a>.</p>
 					<p>This website is still in it's infancy. In the near future I'm going to be working on:</p>
@@ -99,7 +99,7 @@
 					</div>
 					<div class="bs-callout bs-callout-warning">
 						<h4>Videos may be deleted</h4>
-						This website is still an early prototype, and as such, is not stable. Don't be surprised if the video you uploaded last week suddenly disappears.
+						This website is still an early prototype, and as such, is not stable. Don't be surprised if the videos you uploaded last week suddenly disappear.
 					</div>
 					<form id="uploadForm" class="form-horizontal">
 						<div class="form-group ">
