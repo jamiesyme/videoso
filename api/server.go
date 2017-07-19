@@ -25,7 +25,6 @@ import (
 
 const genSamplesPath = "/opt/videoso/api/gen-samples.sh"
 const genDashPath = "/opt/videoso/api/gen-mpeg-dash.sh"
-const storePath = "/var/www/videoso/"
 
 type ServerConfig struct {
 	Address            string
@@ -170,7 +169,7 @@ func uploadVideo(ctx *serverContext, w http.ResponseWriter, r *http.Request, _ h
 	// Generate the samples
 	log.Println("generating samples...")
 	samplesCmd := exec.Command(genSamplesPath, tempDir, videoId)
-	samplesCmd.Dir = storePath
+	samplesCmd.Dir = tempDir
 	err = samplesCmd.Run()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -183,7 +182,7 @@ func uploadVideo(ctx *serverContext, w http.ResponseWriter, r *http.Request, _ h
 	// Generate the mpeg dash data
 	log.Println("generating dash info...")
 	dashCmd := exec.Command(genDashPath, tempDir, videoId)
-	dashCmd.Dir = storePath
+	dashCmd.Dir = tempDir
 	err = dashCmd.Run()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
