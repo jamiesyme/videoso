@@ -6,11 +6,13 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"math"
 	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"time"
+	"unicode/utf8"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -108,15 +110,35 @@ func RunServer(config *ServerConfig) {
 
 func uploadVideo(ctx *serverContext, w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
+	// Apply the file size limit
+	// We add an extra MB to account for the other request body parameters
+	maxReqBytes := int64((100 + 1) * math.Pow(2, 20))
+	r.Body = http.MaxBytesReader(w, r.Body, maxReqBytes)
+
 	// Read the input file
 	in, _, err := r.FormFile("videoFile")
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		log.Println("new upload failed - bad request")
-		log.Println(err.Error)
+		log.Println("new upload failed - bad request - file")
+		log.Println(err.Error())
 		return
 	}
 	defer in.Close()
+
+	// Read the input title
+	videoTitle := r.FormValue("title")
+	if utf8.RuneCountInString(videoTitle) == 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		log.Println("new upload failed - bad request - title")
+		log.Println("title required")
+		return
+	}
+	if utf8.RuneCountInString(videoTitle) > 100 {
+		w.WriteHeader(http.StatusBadRequest)
+		log.Println("new upload failed - bad request - title")
+		log.Println("title too long")
+		return
+	}
 
 	// Create a temporary directory for us to work in
 	tempDir, err := ioutil.TempDir("", "upload")
@@ -207,7 +229,6 @@ func uploadVideo(ctx *serverContext, w http.ResponseWriter, r *http.Request, _ h
 	log.Println("uploaded to s3")
 
 	log.Println("saving to postgres...")
-	videoTitle := r.FormValue("title")
 	videoCreatedAt := time.Now()
 	queryStr := "INSERT INTO videos(video_id, title, original_video_s3_url, video_mpd_s3_url, created_at) VALUES($1, $2, $3, $4, $5);"
 	_, err = ctx.db.Exec(
