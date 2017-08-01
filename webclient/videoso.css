@@ -1,0 +1,36 @@
+h1 {
+    margin-bottom: 20px;
+}
+
+#pageTitle {
+    height: 120px;
+    line-height: 120px;
+    background-color: #1C4666;
+    color: white;
+    font-size: 42px;
+    text-align: center;
+}
+
+section {
+    margin-bottom: 20px;
+}
+
+ul#videoList {
+    margin-top: -10px;
+}
+
+#videoList li {
+    margin-top: 20px;
+}
+
+@media only screen and (max-width : 767px) {
+    #videoList li {
+	margin-bottom: 40px;
+    }
+}
+
+#videoList li h2 {
+    font-size: 20px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+}

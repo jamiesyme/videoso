@@ -7,70 +7,18 @@
 		<title>Videoso</title>
 
 		<!-- Video.js CSS -->
-		<link href="https://unpkg.com/video.js/dist/video-js.css" rel="stylesheet">
+		<link rel="stylesheet" href="https://unpkg.com/video.js/dist/video-js.css">
 
 		<!-- Bootstrap CSS -->
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-
-		<!-- Bootstrap callout CSS -->
-		<!-- Find here: https://cpratt.co/twitter-bootstrap-callout-css-styles/ -->
-		<style>
-		.bs-callout {
-			padding: 20px;
-			margin: 20px 0;
-			border: 1px solid #eee;
-			border-left-width: 5px;
-			border-radius: 3px;
-		}
-		.bs-callout h4 {
-			margin-top: 0;
-			margin-bottom: 5px;
-		}
-		.bs-callout-warning {
-			border-left-color: #f0ad4e;
-		}
-		.bs-callout-warning h4 {
-			color: #f0ad4e;
-		}
-		</style>
+		<link rel="stylesheet" href="/f/bootstrap-callout.css">
 
 		<!-- Videoso CSS -->
-		<style>
-		h1 {
-			margin-bottom: 20px;
-		}
-		#pageTitle {
-			height: 120px;
-			line-height: 120px;
-			background-color: #1C4666;
-			color: white;
-			font-size: 42px;
-			text-align: center;
-		}
-		section {
-			margin-bottom: 20px;
-		}
-		ul#videoList {
-			margin-top: -10px;
-		}
-		#videoList li {
-			margin-top: 20px;
-		}
-		@media only screen and (max-width : 767px) {
-			#videoList li {
-				margin-bottom: 40px;
-			}
-		}
-		#videoList li h2 {
-			font-size: 20px;
-			margin-top: 10px;
-			margin-bottom: 20px;
-		}
-		</style>
+		<link rel="stylesheet" href="/f/videoso.css">
 	</head>
 
 	<body>
-		<div id="pageTitle">Videoso</div>
+		{{template "header"}}
 		<div class="container">
 			<div class="row">
 				<section class="col-sm-6">
