@@ -1,6 +1,7 @@
 package webserver
 
 import (
+	"html/template"
 	"path"
 
 	"github.com/gin-gonic/gin"
@@ -15,6 +16,10 @@ func isStringInSlice(s string, l []string) bool {
 	return false
 }
 
+func makeApiUrl(s string) string {
+	return "http://dev-videoso:8001" + path.Join("/", s)
+}
+
 const fileDir = "/opt/videoso/webclient/"
 
 var staticExt = []string{".css", ".js"}
@@ -23,12 +28,28 @@ var templateExt = []string{".gotmpl"}
 
 func RunServer(addr string) {
 	router := gin.Default()
+
+	router.SetFuncMap(template.FuncMap{
+		"makeApiUrl": makeApiUrl,
+	})
 	for _, ext := range templateExt {
 		router.LoadHTMLGlob(path.Join(fileDir, "*"+ext))
 	}
 
 	router.GET("/", func(c *gin.Context) {
 		serveTemplate("index"+templateExt[0], c)
+	})
+	router.GET("/login", func(c *gin.Context) {
+		serveTemplate("login"+templateExt[0], c)
+	})
+	router.GET("/register", func(c *gin.Context) {
+		serveTemplate("login"+templateExt[0], c)
+	})
+	router.GET("/forgot-password", func(c *gin.Context) {
+		serveTemplate("login"+templateExt[0], c)
+	})
+	router.GET("/reset-password", func(c *gin.Context) {
+		serveTemplate("reset-password"+templateExt[0], c)
 	})
 
 	router.GET("/f/:filename", func(c *gin.Context) {

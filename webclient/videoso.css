@@ -2,13 +2,36 @@ h1 {
     margin-bottom: 20px;
 }
 
-#pageTitle {
-    height: 120px;
-    line-height: 120px;
+/*.topbar {
+    height: 60px;
     background-color: #1C4666;
+    padding-top: 5px;
+    padding-left: 30px;
+    padding-right: 30px;
+}
+.topbar-title {
     color: white;
     font-size: 42px;
-    text-align: center;
+}
+a.topbar-title:hover {
+    color: #BBB;
+}
+.topbar-nav {
+    display: inline-block;
+    float: right;
+    line-height: 20px;
+}
+.topbar-nav-link {
+    color: white;
+    font-size: 16px;
+}
+.nav > li > .topbar-nav-link:hover {
+    color: #1C4666;
+    background-color: white;
+}*/
+
+.login-tabs-nav {
+    margin-bottom: 20px;
 }
 
 section {
