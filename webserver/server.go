@@ -17,7 +17,7 @@ func isStringInSlice(s string, l []string) bool {
 }
 
 func makeApiUrl(s string) string {
-	return "http://dev-videoso:8001" + path.Join("/", s)
+	return "http://dev-videoso:8001" + s
 }
 
 const fileDir = "/opt/videoso/webclient/"

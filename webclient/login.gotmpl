@@ -20,10 +20,10 @@
 				<section id="login-tabs-section" class="col-sm-6 col-sm-offset-3" style="display: none;">
 					<ul class="login-tabs-nav nav nav-tabs nav-justified">
 						<li>
-							<a href="#" id="login-link">Log in</a>
+							<a href="#" id="login-section-link">Log in</a>
 						</li>
 						<li>
-							<a href="#" id="register-link">Register</a>
+							<a href="#" id="register-section-link">Register</a>
 						</li>
 					</ul>
 					<section id="login-section">
@@ -98,6 +98,9 @@
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
 		<!-- Videoso JS -->
+		{{template "js-helpers"}}
+		<script src="/f/authentication.js"></script>
+		<script src="/f/header.js"></script>
 		<script>
 		function validatePasswordConfirmation(element) {
 			var $form = $(element).closest('form');
@@ -121,20 +124,20 @@
 		function enableLoginSection() {
 			$('#login-section').show();
 			$('#login-section-error').hide();
-			$('#login-link').closest('li').addClass('active');
+			$('#login-section-link').closest('li').addClass('active');
 		}
 		function disableLoginSection() {
 			$('#login-section').hide();
-			$('#login-link').closest('li').removeClass('active');
+			$('#login-section-link').closest('li').removeClass('active');
 		}
 		function enableRegisterSection() {
 			$('#register-section').show();
 			$('#register-section-error').hide();
-			$('#register-link').closest('li').addClass('active');
+			$('#register-section-link').closest('li').addClass('active');
 		}
 		function disableRegisterSection() {
 			$('#register-section').hide();
-			$('#register-link').closest('li').removeClass('active');
+			$('#register-section-link').closest('li').removeClass('active');
 		}
 		function enableForgotPasswordSection() {
 			$('#forgot-password-section').show();
@@ -192,12 +195,12 @@
 			loadPath(path);
 		};
 
-		$('#login-link').click(function(e) {
+		$('#login-section-link').click(function(e) {
 			e.preventDefault();
 			loadPath(loginPath);
 			addPathToHistory(loginPath);
 		});
-		$('#register-link').click(function(e) {
+		$('#register-section-link').click(function(e) {
 			e.preventDefault();
 			loadPath(registerPath);
 			addPathToHistory(registerPath);
@@ -214,33 +217,24 @@
 		});
 		$('#login-section').find('form').submit(function(e) {
 			e.preventDefault();
-			var data = {
-				emailAddress: $(this).find('[name=emailAddress]').val(),
-				password: $(this).find('[name=password]').val()
-			};
+			var emailAddress = $(this).find('[name=emailAddress]').val();
+			var password = $(this).find('[name=password]').val();
 			$(this).find('[name=password]').val('');
 			var $error = $('#login-section-error');
 			$error.hide();
-			$.ajax({{"/sessions" | makeApiUrl}}, {
-				type: 'POST',
-				data: data,
-				complete: function(jqXHR, textStatus) {
-					var resData = jqXHR.responseJSON;
-					switch (jqXHR.status) {
-						case 200:
-							window.localStorage.setItem('sessionId', resData.sessionId);
-							window.location.href = '/';
-							break;
-						case 404:
-							$error.html('<strong>Oops!</strong> The email address or password are incorrect.');
-							$error.show();
-							break;
-						default:
-							$error.html('<strong>Oops!</strong> There was an error while logging in. Please try again.');
-							$error.show();
+			login(emailAddress, password)
+				.then(function() {
+					window.location.href = '/';
+				})
+				.catch(function(err) {
+					if (err instanceof InvalidCredentialsError) {
+						$error.html('<strong>Oops!</strong> The email address or password is incorrect.');
+						$error.show();
+					} else {
+						$error.html('<strong>Oops!</strong> There was an error while logging in. Please try again.');
+						$error.show();
 					}
-				}
-			});
+				});
 		});
 		$('#register-section').find('form').submit(function(e) {
 			e.preventDefault();
@@ -253,38 +247,32 @@
 			$(this).find('[name=confirmPassword]').val('');
 			var $error = $('#register-section-error');
 			$error.hide();
-			$.ajax({{"/users" | makeApiUrl}}, {
-				type: 'POST',
-				data: data,
-				complete: function(jqXHR, textStatus) {
-					switch (jqXHR.status) {
-						case 200:
-							data = {
-								emailAddress: data.emailAddress,
-								password: data.password
-							};
-							$.ajax({{"/sessions" | makeApiUrl}}, {
-								type: 'POST',
-								data: data,
-								complete: function(jqXHR, textStatus) {
-									var resData = jqXHR.responseJSON;
-									switch (jqXHR.status) {
-										case 200:
-											window.localStorage.setItem('sessionId', resData.sessionId);
-											window.location.href = '/';
-											break;
-										default:
-											$error.html('<strong>Oops!</strong> Your account was successfully created, but there was an error while logging in. Please try <a href="/login">logging in</a> again.');
-											$error.show();
-									}
-								}
-							});
-							break;
-						default:
-							$error.html('<strong>Oops!</strong> There was an error during registration. Please try again later.');
-							$error.show();
+			var p1 = $.post({{"/users" | makeApiUrl}}, JSON.stringify(data));
+			p1.catch(function(jqXHR) {
+				if (jqXHR.status === 409) {
+					if (jqXHR.responseJSON.error === 'email address is taken') {
+						$error.html('<strong>Oops!</strong> That email address is already registered.');
+						$error.show();
+						return;
+					} else if (jqXHR.responseJSON.error === 'username is taken') {
+						$error.html('<strong>Oops!</strong> That username is already taken.');
+						$error.show();
+						return;
 					}
 				}
+				$error.html('<strong>Oops!</strong> There was an error during registration. Please try again later.');
+				$error.show();
+			});
+			p1.then(function() {
+				login(data.emailAddress, data.password)
+					.then(function() {
+						window.location.href = '/';
+					})
+					.catch(function() {
+						console.log('Catch 2');
+						$error.html('<strong>Oops!</strong> Your account was successfully created, but there was an error while logging in. Please try <a href="/login">logging in</a> again.');
+						$error.show();
+					});
 			});
 		});
 		$('#forgot-password-send-section').find('form').submit(function(e) {
@@ -294,21 +282,15 @@
 			};
 			var $error = $('#forgot-password-send-section-error');
 			$error.hide();
-			$.ajax({{"/user-password-resets" | makeApiUrl}}, {
-				type: 'POST',
-				data: data,
-				complete: function(jqXHR, textStatus) {
-					switch (jqXHR.status) {
-						case 200:
-							disableForgotPasswordSendSection();
-							enableForgotPasswordSentSection();
-							break;
-						default:
-							$error.html('<strong>Oops!</strong> There was an error while requesting a password reset. Please try again later.');
-							$error.show();
-					}
-				}
-			});
+			$.post({{"/user-password-resets" | makeApiUrl}}, JSON.stringify(data))
+				.then(function() {
+					disableForgotPasswordSendSection();
+					enableForgotPasswordSentSection();
+				})
+				.catch(function() {
+					$error.html('<strong>Oops!</strong> There was an error while requesting a password reset. Please try again later.');
+					$error.show();
+				});
 		});
 
 		loadPath(window.location.pathname);

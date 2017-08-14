@@ -78,7 +78,6 @@ func getVideosHandler(server *Server) func(*gin.Context) {
 			log.Println(err.Error())
 		}
 
-		c.Header("access-control-allow-origin", "*")
 		c.JSON(200, gin.H{
 			"videos": videosJson,
 		})
@@ -235,7 +234,6 @@ func newVideoHandler(server *Server) func(*gin.Context) {
 		log.Println("saved to postgres")
 
 		log.Println("new upload successful")
-		c.Header("access-control-allow-origin", "*")
 		c.JSON(201, gin.H{
 			"videoId":     videoId,
 			"title":       videoTitle,

@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 )
@@ -24,6 +25,12 @@ func NewServer() *Server {
 	server := new(Server)
 	server.Address = ":8001"
 	server.Router = gin.Default()
+	config := cors.DefaultConfig()
+	config.AllowAllOrigins = true
+	config.AllowCredentials = true
+	config.AddAllowMethods("DELETE")
+	config.AddAllowHeaders("authorization")
+	server.Router.Use(cors.New(config))
 	return server
 }
 
