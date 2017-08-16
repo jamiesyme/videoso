@@ -67,14 +67,12 @@ func checkPasswordHash(password, hash string) bool {
 
 type UserInput struct {
 	EmailAddress string `json:"emailAddress"`
-	Username     string `json:"username"`
 	Password     string `json:"password"`
 }
 
 type UserOutput struct {
 	UserId       string `json:"userId"`
 	EmailAddress string `json:"emailAddress"`
-	Username     string `json:"username"`
 }
 
 func newUserHandler(server *Server) func(*gin.Context) {
@@ -91,26 +89,19 @@ func newUserHandler(server *Server) func(*gin.Context) {
 		}
 		if !isEmailAddressValid(userInput.EmailAddress) {
 			c.JSON(400, gin.H{
-				"error": "bad email address",
-			})
-			return
-		}
-		if !isUsernameValid(userInput.Username) {
-			c.JSON(400, gin.H{
-				"error": "bad username",
+				"error": "invalid email address",
 			})
 			return
 		}
 		if !isPasswordValid(userInput.Password) {
 			c.JSON(400, gin.H{
-				"error": "bad password",
+				"error": "invalid password",
 			})
 			return
 		}
 
 		// Clean the user data
 		cleanEmailAddress := genCleanEmailAddress(userInput.EmailAddress)
-		cleanUsername := genCleanUsername(userInput.Username)
 
 		// Generate the user id
 		userId := uuid.NewV4().String()
@@ -130,17 +121,13 @@ func newUserHandler(server *Server) func(*gin.Context) {
 			"INSERT INTO users (" +
 			"  user_id," +
 			"  email_address," +
-			"  username," +
-			"  username_clean," +
 			"  password_hash," +
 			"  created_at" +
-			") VALUES ($1, $2, $3, $4, $5, $6)"
+			") VALUES ($1, $2, $3, $4)"
 		_, err = server.Db.Exec(
 			queryStr,
 			userId,
 			cleanEmailAddress,
-			userInput.Username,
-			cleanUsername,
 			passwordHash,
 			userCreatedAt.UTC(),
 		)
@@ -152,14 +139,6 @@ func newUserHandler(server *Server) func(*gin.Context) {
 				if pqErr.Constraint == "users_email_address_key" {
 					c.JSON(409, gin.H{
 						"error": "email address is taken",
-					})
-					return
-				}
-
-				// Check for username conflicts
-				if pqErr.Constraint == "users_username_clean_key" {
-					c.JSON(409, gin.H{
-						"error": "username is taken",
 					})
 					return
 				}
@@ -175,7 +154,6 @@ func newUserHandler(server *Server) func(*gin.Context) {
 		c.JSON(201, &UserOutput{
 			UserId:       userId,
 			EmailAddress: userInput.EmailAddress,
-			Username:     userInput.Username,
 		})
 	}
 }
@@ -183,16 +161,14 @@ func newUserHandler(server *Server) func(*gin.Context) {
 func getUserHandler(server *Server) func(*gin.Context) {
 	return func(c *gin.Context) {
 		queryStr := "" +
-			"SELECT email_address, username " +
+			"SELECT email_address " +
 			"FROM users " +
 			"WHERE user_id = $1"
 		var (
 			emailAddress string
-			username     string
 		)
 		err := server.Db.QueryRow(queryStr, c.Param("userId")).Scan(
 			&emailAddress,
-			&username,
 		)
 		if err != nil {
 			c.Status(500)
@@ -203,7 +179,6 @@ func getUserHandler(server *Server) func(*gin.Context) {
 		c.JSON(200, &UserOutput{
 			UserId:       c.Param("userId"),
 			EmailAddress: emailAddress,
-			Username:     username,
 		})
 	}
 }

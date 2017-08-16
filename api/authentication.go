@@ -135,13 +135,13 @@ func newRefreshTokenHandler(server *Server) func(*gin.Context) {
 		}
 		if !isEmailAddressValid(userInput.EmailAddress) {
 			c.JSON(400, gin.H{
-				"error": "bad email address",
+				"error": "invalid email address",
 			})
 			return
 		}
 		if !isPasswordValid(userInput.Password) {
 			c.JSON(400, gin.H{
-				"error": "bad password",
+				"error": "invalid password",
 			})
 			return
 		}
@@ -163,7 +163,7 @@ func newRefreshTokenHandler(server *Server) func(*gin.Context) {
 		)
 		if err == sql.ErrNoRows {
 			c.JSON(404, gin.H{
-				"error": "invalid email address or password",
+				"error": "email address not found",
 			})
 			return
 		}
@@ -176,8 +176,8 @@ func newRefreshTokenHandler(server *Server) func(*gin.Context) {
 
 		// Check the password
 		if !checkPasswordHash(userInput.Password, passwordHash) {
-			c.JSON(404, gin.H{
-				"error": "invalid email address or password",
+			c.JSON(403, gin.H{
+				"error": "incorrect password",
 			})
 			return
 		}

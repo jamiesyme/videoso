@@ -26,40 +26,21 @@
 							<a href="#" id="register-section-link">Register</a>
 						</li>
 					</ul>
-					<section id="login-section">
-						<div id="login-section-error" class="alert alert-danger" style="display: none;"></div>
+					<section id="login-register-section">
+						<div id="login-section-error" class="login-section-only alert alert-danger" style="display: none;"></div>
+						<div id="register-section-error" class="register-section-only alert alert-danger" style="display: none;"></div>
 						<form>
 							<div class="form-group">
 								<input type="email" maxlength="254" required name="emailAddress" class="form-control" placeholder="Email address">
 							</div>
 							<div class="form-group">
-								<input type="password" maxlength="128" required name="password" class="form-control" placeholder="Password">
+								<input type="password" maxlength="1024" required name="password" class="form-control" placeholder="Password">
 							</div>
 							<div class="form-group">
 								<button type="submit" class="btn btn-primary btn-lg btn-block">Log in</button>
 							</div>
-							<div class="form-group">
+							<div class="login-section-only form-group">
 								<a href="#" id="forgot-password-link">Forgot your password?</a>
-							</div>
-						</form>
-					</section>
-					<section id="register-section">
-						<div id="register-section-error" class="alert alert-danger" style="display: none;"></div>
-						<form>
-							<div class="form-group">
-								<input type="email" maxlength="254" required name="emailAddress" class="form-control" placeholder="Email address">
-							</div>
-							<div class="form-group">
-								<input type="text" maxlength="20" required name="username" class="form-control" placeholder="Username">
-							</div>
-							<div class="form-group">
-								<input type="password" maxlength="128" required oninput="validatePasswordConfirmation(this);" name="password" class="form-control" placeholder="Password">
-							</div>
-							<div class="form-group">
-								<input type="password" maxlength="128" required oninput="validatePasswordConfirmation(this);" name="confirmPassword" class="form-control" placeholder="Confirm password">
-							</div>
-							<div class="form-group">
-								<button type="submit" class="btn btn-primary btn-lg btn-block">Register</button>
 							</div>
 						</form>
 					</section>
@@ -102,19 +83,6 @@
 		<script src="/f/authentication.js"></script>
 		<script src="/f/header.js"></script>
 		<script>
-		function validatePasswordConfirmation(element) {
-			var $form = $(element).closest('form');
-			var $password = $form.find('[name=password]');
-			var $confirmPassword = $form.find('[name=confirmPassword]');
-			var password = $password.val();
-			var confirmPassword = $confirmPassword.val();
-			if (password !== confirmPassword) {
-				$confirmPassword[0].setCustomValidity('Passwords must match.');
-			} else {
-				$confirmPassword[0].setCustomValidity('');
-			}
-		}
-
 		function enableLoginTabsSection() {
 			$('#login-tabs-section').show();
 		}
@@ -122,21 +90,27 @@
 			$('#login-tabs-section').hide();
 		}
 		function enableLoginSection() {
-			$('#login-section').show();
+			$('#login-register-section').show();
+			$('.login-section-only').show();
 			$('#login-section-error').hide();
 			$('#login-section-link').closest('li').addClass('active');
+			$('#login-register-section').find('[type=submit]').val('Log in');
 		}
 		function disableLoginSection() {
-			$('#login-section').hide();
+			$('#login-register-section').hide();
+			$('.login-section-only').hide();
 			$('#login-section-link').closest('li').removeClass('active');
 		}
 		function enableRegisterSection() {
-			$('#register-section').show();
+			$('#login-register-section').show();
+			$('.register-section-only').show();
 			$('#register-section-error').hide();
 			$('#register-section-link').closest('li').addClass('active');
+			$('#login-register-section').find('[type=submit]').val('Register');
 		}
 		function disableRegisterSection() {
-			$('#register-section').hide();
+			$('#login-register-section').hide();
+			$('.register-section-only').hide();
 			$('#register-section-link').closest('li').removeClass('active');
 		}
 		function enableForgotPasswordSection() {
@@ -162,6 +136,7 @@
 		var loginPath = '/login';
 		var registerPath = '/register';
 		var forgotPasswordPath = '/forgot-password';
+		var currentPath = null;
 		var pathToTitle = {};
 		pathToTitle[loginPath] = 'Log in | Videoso';
 		pathToTitle[registerPath] = 'Register | Videoso';
@@ -188,6 +163,7 @@
 				enableForgotPasswordSendSection();
 				enableForgotPasswordSection();
 			}
+			currentPath = path;
 		};
 
 		window.onpopstate = function(e) {
@@ -195,67 +171,105 @@
 			loadPath(path);
 		};
 
+		// This will be true whenever we are waiting for a server response, and
+		// it will prevent link clicks that lead to other forms on the same page.
+		// Example: Clicking the "Log in" tab after clicking "Register"
+		var softLinksLock = false;
+		function lockSoftLinks() {
+			softLinksLock = true;
+		}
+		function unlockSoftLinks() {
+			softLinksLock = false;
+		}
+
 		$('#login-section-link').click(function(e) {
 			e.preventDefault();
-			loadPath(loginPath);
-			addPathToHistory(loginPath);
+			if (!softLinksLock) {
+				loadPath(loginPath);
+				addPathToHistory(loginPath);
+			}
 		});
 		$('#register-section-link').click(function(e) {
 			e.preventDefault();
-			loadPath(registerPath);
-			addPathToHistory(registerPath);
+			if (!softLinksLock) {
+				loadPath(registerPath);
+				addPathToHistory(registerPath);
+			}
 		});
 		$('#forgot-password-link').click(function(e) {
 			e.preventDefault();
-			loadPath(forgotPasswordPath);
-			addPathToHistory(forgotPasswordPath);
+			if (!softLinksLock) {
+				loadPath(forgotPasswordPath);
+				addPathToHistory(forgotPasswordPath);
+			}
 		});
 		$('#back-to-login-link').click(function(e) {
 			e.preventDefault();
-			loadPath(loginPath);
-			addPathToHistory(loginPath);
+			if (!softLinksLock) {
+				loadPath(loginPath);
+				addPathToHistory(loginPath);
+			}
 		});
-		$('#login-section').find('form').submit(function(e) {
-			e.preventDefault();
-			var emailAddress = $(this).find('[name=emailAddress]').val();
-			var password = $(this).find('[name=password]').val();
-			$(this).find('[name=password]').val('');
+		function onLoginSectionSubmit($form) {
+			lockSoftLinks();
+
+			var emailAddress = $form.find('[name=emailAddress]').val();
+			var password = $form.find('[name=password]').val();
+			//$(this).find('[name=password]').val('');
+
+			var $submit = $form.find('[type=submit]');
+			var originalSubmitVal = $submit.html();
+			$submit.html('Logging in...');
+			$submit.prop('disabled', true);
+
 			var $error = $('#login-section-error');
 			$error.hide();
+
 			login(emailAddress, password)
 				.then(function() {
 					window.location.href = '/';
 				})
 				.catch(function(err) {
-					if (err instanceof InvalidCredentialsError) {
-						$error.html('<strong>Oops!</strong> The email address or password is incorrect.');
+					unlockSoftLinks();
+					$submit.html(originalSubmitVal);
+					$submit.prop('disabled', false);
+					if (err instanceof NotFoundError) {
+						$error.html("<strong>Oops!</strong> That email address isn't registered yet.");
+						$error.show();
+					} else if (err instanceof InvalidCredentialsError) {
+						$error.html('<strong>Oops!</strong> That password is incorrect.');
 						$error.show();
 					} else {
 						$error.html('<strong>Oops!</strong> There was an error while logging in. Please try again.');
 						$error.show();
 					}
 				});
-		});
-		$('#register-section').find('form').submit(function(e) {
-			e.preventDefault();
+		}
+		function onRegisterSectionSubmit($form) {
+			lockSoftLinks();
+
 			var data = {
-				emailAddress: $(this).find('[name=emailAddress]').val(),
-				username: $(this).find('[name=username]').val(),
-				password: $(this).find('[name=password]').val()
+				emailAddress: $form.find('[name=emailAddress]').val(),
+				password: $form.find('[name=password]').val(),
 			};
-			$(this).find('[name=password]').val('');
-			$(this).find('[name=confirmPassword]').val('');
+			//$(this).find('[name=password]').val('');
+
+			var $submit = $form.find('[type=submit]');
+			var originalSubmitVal = $submit.html();
+			$submit.html('Registering...');
+			$submit.prop('disabled', true);
+
 			var $error = $('#register-section-error');
 			$error.hide();
+
 			var p1 = $.post({{"/users" | makeApiUrl}}, JSON.stringify(data));
 			p1.catch(function(jqXHR) {
+				unlockSoftLinks();
+				$submit.html(originalSubmitVal);
+				$submit.prop('disabled', false);
 				if (jqXHR.status === 409) {
 					if (jqXHR.responseJSON.error === 'email address is taken') {
 						$error.html('<strong>Oops!</strong> That email address is already registered.');
-						$error.show();
-						return;
-					} else if (jqXHR.responseJSON.error === 'username is taken') {
-						$error.html('<strong>Oops!</strong> That username is already taken.');
 						$error.show();
 						return;
 					}
@@ -264,19 +278,31 @@
 				$error.show();
 			});
 			p1.then(function() {
+				$submit.html('Logging in...');
 				login(data.emailAddress, data.password)
 					.then(function() {
 						window.location.href = '/';
 					})
 					.catch(function() {
-						console.log('Catch 2');
+						unlockSoftLinks();
+						$submit.html(originalSubmitVal);
+						$submit.prop('disabled', false);
 						$error.html('<strong>Oops!</strong> Your account was successfully created, but there was an error while logging in. Please try <a href="/login">logging in</a> again.');
 						$error.show();
 					});
 			});
+		}
+		$('#login-register-section').find('form').submit(function(e) {
+			e.preventDefault();
+			if (currentPath === loginPath) {
+				onLoginSectionSubmit($(this));
+			} else if (currentPath === registerPath) {
+				onRegisterSectionSubmit($(this));
+			}
 		});
 		$('#forgot-password-send-section').find('form').submit(function(e) {
 			e.preventDefault();
+			lockSoftLinks();
 			var data = {
 				emailAddress: $(this).find('[name=emailAddress]').val()
 			};
@@ -284,10 +310,12 @@
 			$error.hide();
 			$.post({{"/user-password-resets" | makeApiUrl}}, JSON.stringify(data))
 				.then(function() {
+					unlockSoftLinks();
 					disableForgotPasswordSendSection();
 					enableForgotPasswordSentSection();
 				})
 				.catch(function() {
+					unlockSoftLinks();
 					$error.html('<strong>Oops!</strong> There was an error while requesting a password reset. Please try again later.');
 					$error.show();
 				});

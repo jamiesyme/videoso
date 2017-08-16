@@ -49,6 +49,7 @@ var ServerError = makeCustomError('ServerError');
 /**
  * @promise LoginPromise
  * @reject {InvalidCredentialsError} 
+ * @reject {NotFoundError}
  * @reject {LoggedInError} Must log out before logging in again.
  * @reject {ServerError}
  */
@@ -227,7 +228,8 @@ function authenticatedAjax(url, settings) {
  * @promise GetRefreshTokenPromise
  * @fulfill {string} refreshTokenId
  * @reject {InvalidCredentialsError} Only used if credentials are provided.
- * @reject {NotFoundError} Only used if credentials are not provided.
+ * @reject {NotFoundError} Used if credentials are not provided, or if the email
+ *                         address is not found.
  * @reject {ServerError}
  */
 
@@ -270,6 +272,7 @@ function getRefreshToken(emailAddress, password) {
  * @promise CreateRefreshTokenPromise
  * @fulfill {string} refreshTokenId
  * @reject {InvalidCredentialsError}
+ * @reject {NotFoundError}
  * @reject {ServerError}
  */
 
@@ -288,8 +291,12 @@ function createRefreshToken(emailAddress, password) {
 			.then(function(data, textStatus, jqXHR) {
 				resolve(jqXHR.responseJSON.refreshTokenId);
 			}, function(jqXHR) {
-				if (jqXHR.status === 404) {
+				if (jqXHR.status === 403) {
 					reject(new InvalidCredentialsError());
+					return;
+				}
+				if (jqXHR.status === 404) {
+					reject(new NotFoundError());
 					return;
 				}
 				reject(new ServerError());
