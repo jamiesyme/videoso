@@ -128,7 +128,8 @@ func newVideoHandler(server *Server) func(*gin.Context) {
 		defer os.RemoveAll(tempDir)
 
 		// Open the output file
-		videoId := uuid.NewV4().String()
+		videoIdUuid, _ := uuid.NewV4()
+		videoId := videoIdUuid.String()
 		videoPath := filepath.Join(tempDir, videoId+".mp4")
 		out, err := os.OpenFile(videoPath, os.O_WRONLY|os.O_CREATE, 0644)
 		if err != nil {

@@ -104,7 +104,8 @@ func newUserHandler(server *Server) func(*gin.Context) {
 		cleanEmailAddress := genCleanEmailAddress(userInput.EmailAddress)
 
 		// Generate the user id
-		userId := uuid.NewV4().String()
+		userIdUuid, _ := uuid.NewV4()
+		userId := userIdUuid.String()
 
 		// Hash the password
 		passwordHash, err := hashPassword(userInput.Password)
