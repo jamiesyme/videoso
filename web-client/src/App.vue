@@ -1,16 +1,15 @@
 <template>
 	<div id="app">
-		<div id="nav">
-			<router-link to="/">Home</router-link> |
-			<router-link to="/about">About</router-link>
-		</div>
-		<router-view />
+		<router-view></router-view>
 	</div>
 </template>
 
 <style lang="scss">
+	@import url('//fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic');
+	@import url('//cdn.rawgit.com/necolas/normalize.css/master/normalize.css');
+	@import url('//cdn.rawgit.com/milligram/milligram/master/dist/milligram.min.css');
+
 	#app {
-		font-family: 'Avenir', Helvetica, Arial, sans-serif;
 		-webkit-font-smoothing: antialiased;
 		-moz-osx-font-smoothing: grayscale;
 		text-align: center;
