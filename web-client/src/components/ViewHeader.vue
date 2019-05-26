@@ -33,8 +33,6 @@
 	}
 
 	.logo-wrapper {
-		text-align: left;
-
 		img {
 			width: auto;
 			height: 100%;
@@ -42,6 +40,7 @@
 	}
 
 	.login-wrapper {
+		font-weight: bold;
 		text-align: right;
 	}
 </style>
