@@ -1,8 +1,19 @@
 <template>
 	<div id="app">
+		<ViewHeader></ViewHeader>
 		<router-view></router-view>
 	</div>
 </template>
+
+<script>
+	import ViewHeader from '@/components/ViewHeader';
+
+	export default {
+		components: {
+			ViewHeader,
+		},
+	}
+</script>
 
 <style lang="scss">
 	@import url('//fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic');
