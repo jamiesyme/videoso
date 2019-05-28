@@ -7,11 +7,13 @@
 			<div class="search-wrapper">
 				<input
 					type="text"
-					placeholder="Search..."
+					placeholder="Search"
 					v-if="showSearch">
 			</div>
 			<div class="login-wrapper">
-				<router-link to="#">Log in</router-link>
+				<router-link to="/login" class="button button-clear">
+					Log in
+				</router-link>
 			</div>
 		</div>
 	</header>
@@ -73,9 +75,8 @@
 		font-weight: bold;
 		text-align: right;
 
-		a {
-			position: relative;
-			top: -0.4rem;
+		.button {
+			padding: 0 1rem;
 		}
 	}
 </style>

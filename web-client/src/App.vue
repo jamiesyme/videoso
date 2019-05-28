@@ -19,6 +19,7 @@
 	@import url('//fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic');
 	@import url('//cdn.rawgit.com/necolas/normalize.css/master/normalize.css');
 	@import url('//cdn.rawgit.com/milligram/milligram/master/dist/milligram.min.css');
+	@import '~vue-ionicons/ionicons.scss';
 
 	#app {
 		-webkit-font-smoothing: antialiased;
