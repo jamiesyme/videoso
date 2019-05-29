@@ -1,8 +1,9 @@
 <template>
 	<div class="label-input">
 		<input
-			type="text"
 			ref="input"
+			:list="list"
+			:type="type"
 			:value="value"
 			@keydown="checkEnter($event)"
 			@input="$emit('input', $event.target.value)"
@@ -12,7 +13,12 @@
 			class="label"
 			@click="startEditing()"
 			v-else>
-			{{ value }}
+			<div class="label-value" v-if="value">{{ value }}</div>
+			<slot
+				name="empty"
+				v-else>
+				<div class="empty-label"></div>
+			</slot>
 		</div>
 	</div>
 </template>
@@ -20,6 +26,11 @@
 <script>
 	export default {
 		props: {
+			list: String,
+			type: {
+				type: String,
+				default: 'text',
+			},
 			value: String,
 		},
 
@@ -64,5 +75,13 @@
 
 	.label:hover {
 		cursor: text;
+	}
+	.label-value {
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.empty-label {
+		min-height: 2.4rem;
 	}
 </style>
