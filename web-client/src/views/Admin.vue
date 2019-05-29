@@ -159,6 +159,14 @@
 										</td>
 									</tr>
 									<tr>
+										<td>Category</td>
+										<td>
+											<LabelInput
+												list="category-datalist"
+												v-model="video.category" />
+										</td>
+									</tr>
+									<tr>
 										<td>Author</td>
 										<td>
 											<LabelInput
@@ -189,10 +197,15 @@
 					</tbody>
 				</table>
 
+				<datalist id="category-datalist">
+					<option
+						:value="category.title"
+						v-for="category in categories" />
+				</datalist>
 				<datalist id="user-datalist">
 					<option
 						:value="user.name"
-						v-for="user of users" />
+						v-for="user in users" />
 				</datalist>
 			</section>
 		</div>
@@ -238,6 +251,7 @@
 					 * @property {string} tags - space-separated
 					 * @property {string} publishedAt - YYYY-MM-DDThh:mm
 					 * @property {number} viewCount
+					 * @property {string} category - category.title
 					 * @property {string} author - user.name
 					 */
 				],
@@ -299,6 +313,7 @@
 					tags: '',
 					publishedAt: todayDate,
 					viewCount: 0,
+					category: null,
 					author: null,
 				});
 			},
@@ -392,9 +407,13 @@
 				vertical-align: top;
 			}
 			.video table {
+				padding-left: 2.5rem;
 				margin-bottom: 0;
 				td {
 					border: none;
+				}
+				td:first-of-type {
+					width: 20rem;
 				}
 			}
 		}
