@@ -1,22 +1,31 @@
 <template>
 	<div class="admin-view container">
-		<nav>
+		<div class="sidebar">
+			<nav>
+				<button
+					class="button-clear"
+					@click="section = 'categories'">
+					Categories
+				</button>
+				<button
+					class="button-clear"
+					@click="section = 'users'">
+					Users
+				</button>
+				<button
+					class="button-clear"
+					@click="section = 'videos'">
+					Videos
+				</button>
+			</nav>
+			<hr>
 			<button
 				class="button-clear"
-				@click="section = 'categories'">
-				Categories
+				:disabled="saving || loading"
+				@click="saveContent()">
+				Save
 			</button>
-			<button
-				class="button-clear"
-				@click="section = 'users'">
-				Users
-			</button>
-			<button
-				class="button-clear"
-				@click="section = 'videos'">
-				Videos
-			</button>
-		</nav>
+		</div>
 
 		<div class="sub-view">
 			<section
@@ -147,7 +156,13 @@
 										<td>
 											<LabelInput
 												type="datetime-local"
-												v-model="video.publishedAt" />
+												v-model="video.publishedAt">
+												<template v-slot:label>
+													<div class="label">
+														{{ prettyDateTime(video.publishedAt) }}
+													</div>
+												</template>
+											</LabelInput>
 										</td>
 									</tr>
 									<tr>
@@ -155,7 +170,7 @@
 										<td>
 											<LabelInput
 												type="number"
-												v-model="video.views" />
+												v-model="video.viewCount" />
 										</td>
 									</tr>
 									<tr>
@@ -216,6 +231,7 @@
 	import IonAdd from 'vue-ionicons/dist/md-add';
 	import IonClose from 'vue-ionicons/dist/md-close';
 	import LabelInput from '@/components/LabelInput';
+	import Content from '@/content';
 
 	export default {
 		components: {
@@ -227,6 +243,8 @@
 		data () {
 			return {
 				section: 'categories',
+				loading: false,
+				saving: false,
 				categories: [
 					/**
 					 * @typedef {object} Category
@@ -258,7 +276,57 @@
 			};
 		},
 
+		async mounted () {
+			await this.loadContent();
+		},
+
 		methods: {
+			async loadContent () {
+				this.loading = true;
+				await Content.load();
+				this.categories = Content.categories.slice();
+				this.users = Content.users.slice();
+				this.videos = Content.videos.map(v => {
+					const pub = new Date(Date.parse(v.publishedAt));
+					const cat = this.categories.find(c => c.id === v.category);
+					const usr = this.users.find(u => u.id === v.author);
+					return {
+						id:          v.id,
+						title:       v.title,
+						description: v.description,
+						tags:        v.tags.join(' '),
+						publishedAt: pub,
+						viewCount:   v.viewCount,
+						category:    cat.title,
+						author:      usr.name,
+					};
+				});
+				this.loading = false;
+			},
+
+			async saveContent () {
+				this.saving = true;
+				Content.categories = this.categories.slice();
+				Content.users = this.users.slice();
+				Content.videos = this.videos.map(v => {
+					const pub = v.publishedAt.toISOString();
+					const cat = this.findCategoryByTitle(v.category);
+					const usr = this.findUserByName(v.author);
+					return {
+						id:          v.id,
+						title:       v.title,
+						description: v.description,
+						tags:        v.tags.split(' '),
+						publishedAt: pub,
+						viewCount:   v.viewCount,
+						category:    cat.id,
+						author:      usr.id,
+					};
+				});
+				await Content.save();
+				this.saving = false;
+			},
+
 			addCategory () {
 				const nextId = this.categories.reduce((accum, next) => {
 					return Math.max(next.id + 1, accum);
@@ -274,6 +342,14 @@
 					return c.id === categoryId;
 				});
 				this.categories.splice(index, 1);
+			},
+
+			findCategoryByTitle (title) {
+				const s1 = title.toLowerCase().trim();
+				return this.categories.find(category => {
+					const s2 = category.title.toLowerCase().trim();
+					return s1 === s2;
+				});
 			},
 
 			addUser () {
@@ -294,24 +370,24 @@
 				this.users.splice(index, 1);
 			},
 
+			findUserByName (name) {
+				const s1 = name.toLowerCase().trim();
+				return this.users.find(user => {
+					const s2 = user.name.toLowerCase().trim();
+					return s1 === s2;
+				});
+			},
+
 			addVideo () {
-				function getTodayDateTimeLocal () {
-					const date = new Date;
-					const offset = date.getTimezoneOffset();
-					const msPerMin = 60 * 1000;
-					date.setTime(date.getTime() - offset * msPerMin);
-					return date.toISOString().substr(0, 16);
-				}
 				const nextId = this.videos.reduce((accum, next) => {
 					return Math.max(next.id + 1, accum);
 				}, 1);
-				const todayDate = getTodayDateTimeLocal();
 				this.videos.push({
 					id: nextId,
 					title: 'New Video',
 					description: '',
 					tags: '',
-					publishedAt: todayDate,
+					publishedAt: new Date,
 					viewCount: 0,
 					category: null,
 					author: null,
@@ -324,6 +400,17 @@
 				});
 				this.videos.splice(index, 1);
 			},
+
+			prettyDateTime (date) {
+				return date.toLocaleString('en-US', {
+					month: 'short',
+					day: 'numeric',
+					year: 'numeric',
+					hour: 'numeric',
+					minute: '2-digit',
+					hour12: true,
+				});
+			},
 		},
 	}
 </script>
@@ -335,9 +422,11 @@
 		padding: 0;
 	}
 
-	nav {
+	.sidebar {
 		width: 25%;
 		border-right: 0.1rem solid #eee;
+		padding-right: 3rem;
+		margin-right: 3rem;
 
 		button {
 			display: block;
@@ -345,11 +434,15 @@
 			text-align: left;
 			padding: 0 1rem;
 		}
+
+		hr {
+			border-color: #eee;
+		}
 	}
 
 	.sub-view {
 		flex: 1;
-		margin: 0 0 0 3rem;
+		margin: 0 3rem 0 0;
 
 		.categories-section, .users-section, .videos-section {
 			table {

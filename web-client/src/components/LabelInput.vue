@@ -1,23 +1,41 @@
 <template>
 	<div class="label-input">
-		<input
-			ref="input"
-			:list="list"
-			:type="type"
-			:value="value"
-			@keydown="checkEnter($event)"
-			@input="$emit('input', $event.target.value)"
-			@blur="stopEditing()"
-			v-if="editing">
 		<div
-			class="label"
+			ref="inputWrapper"
+			class="input-wrapper"
+			@blur.capture="stopEditing()"
+			v-if="editing">
+			<slot name="input">
+				<input
+					type="datetime-local"
+					:value="dateToDateTimeLocalStr(value)"
+					@keydown="checkEnter($event)"
+					@input="$emit('input', dateTimeLocalStrToDate($event.target.value))"
+					v-if="type === 'datetime-local'">
+				<input
+					:list="list"
+					:type="type"
+					:value="value"
+					@keydown="checkEnter($event)"
+					@input="$emit('input', $event.target.value)"
+					v-else>
+			</slot>
+		</div>
+		<div
+			class="label-wrapper"
 			@click="startEditing()"
 			v-else>
-			<div class="label-value" v-if="value">{{ value }}</div>
-			<slot
-				name="empty"
-				v-else>
-				<div class="empty-label"></div>
+			<slot name="label">
+				<div
+					class="label"
+					v-if="!isValueEmpty(value)">
+					{{ value }}
+				</div>
+				<slot
+					name="empty"
+					v-else>
+					<div class="label empty-label"></div>
+				</slot>
 			</slot>
 		</div>
 	</div>
@@ -31,7 +49,7 @@
 				type: String,
 				default: 'text',
 			},
-			value: String,
+			value: [String, Date, Number],
 		},
 
 		data () {
@@ -47,8 +65,11 @@
 				}
 				this.editing = true;
 				this.$nextTick(() => {
-					this.$refs.input.focus();
-					this.$refs.input.select();
+					const elem = this.$refs.inputWrapper.querySelector('input');
+					if (elem) {
+						elem.focus();
+						elem.select();
+					}
 				});
 			},
 
@@ -64,6 +85,33 @@
 					this.stopEditing();
 				}
 			},
+
+			isValueEmpty (value) {
+				return (value === null ||
+				        value === '' ||
+				        typeof value === 'undefined');
+			},
+
+			dateToDateTimeLocalStr (date) {
+				if (date instanceof Date) {
+					date = new Date(date);
+					const offset = date.getTimezoneOffset();
+					const msPerMin = 60 * 1000;
+					date.setTime(date.getTime() - offset * msPerMin);
+					return date.toISOString().substr(0, 16);
+				} else {
+					return null;
+				}
+			},
+
+			dateTimeLocalStrToDate (str) {
+				const ms = Date.parse(str);
+				if (typeof ms === 'number') {
+					return new Date(ms);
+				} else {
+					return null;
+				}
+			},
 		},
 	}
 </script>
@@ -73,15 +121,15 @@
 		margin: 0;
 	}
 
-	.label:hover {
+	.label-wrapper:hover {
 		cursor: text;
 	}
-	.label-value {
+
+	.label {
 		overflow: hidden;
 		text-overflow: ellipsis;
-	}
-
-	.empty-label {
-		min-height: 2.4rem;
+		&.empty-label {
+			min-height: 2.4rem;
+		}
 	}
 </style>
