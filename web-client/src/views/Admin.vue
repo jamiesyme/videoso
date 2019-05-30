@@ -2,25 +2,25 @@
 	<div class="admin-view container">
 		<div class="sidebar">
 			<nav>
-				<button
-					class="button-clear"
-					@click="section = 'categories'">
+				<router-link
+					class="button button-clear"
+					to="/admin/categories">
 					Categories
-				</button>
-				<button
-					class="button-clear"
-					@click="section = 'users'">
+				</router-link>
+				<router-link
+					class="button button-clear"
+					to="/admin/users">
 					Users
-				</button>
-				<button
-					class="button-clear"
-					@click="section = 'videos'">
+				</router-link>
+				<router-link
+					class="button button-clear"
+					to="/admin/videos">
 					Videos
-				</button>
+				</router-link>
 			</nav>
 			<hr>
 			<button
-				class="button-clear"
+				class="button button-clear"
 				:disabled="saving || loading"
 				@click="saveContent()">
 				Save
@@ -277,10 +277,25 @@
 		},
 
 		async mounted () {
+			this.updateSectionByPath();
 			await this.loadContent();
 		},
 
 		methods: {
+			updateSectionByPath () {
+				switch (this.$route.path) {
+					case '/admin/users':
+						this.section = 'users';
+						break;
+					case '/admin/videos':
+						this.section = 'videos';
+						break;
+					default:
+						this.section = 'categories';
+						break;
+				}
+			},
+
 			async loadContent () {
 				this.loading = true;
 				await Content.load();
@@ -412,6 +427,12 @@
 				});
 			},
 		},
+
+		watch: {
+			'$route': function () {
+				this.updateSectionByPath();
+			},
+		},
 	}
 </script>
 
@@ -428,7 +449,7 @@
 		padding-right: 3rem;
 		margin-right: 3rem;
 
-		button {
+		.button {
 			display: block;
 			width: 100%;
 			text-align: left;

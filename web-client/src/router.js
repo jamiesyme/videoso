@@ -21,6 +21,21 @@ export default new Router({
 		{
 			path: '/admin',
 			name: 'admin',
+			redirect: '/admin/categories'
+		},
+		{
+			path: '/admin/categories',
+			name: 'admin-categories',
+			component: () => import(/* webpackChunkName: "admin" */ '@/views/Admin')
+		},
+		{
+			path: '/admin/users',
+			name: 'admin-users',
+			component: () => import(/* webpackChunkName: "admin" */ '@/views/Admin')
+		},
+		{
+			path: '/admin/videos',
+			name: 'admin-videos',
 			component: () => import(/* webpackChunkName: "admin" */ '@/views/Admin')
 		},
 		/*{
