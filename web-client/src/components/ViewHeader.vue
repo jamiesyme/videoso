@@ -2,7 +2,9 @@
 	<header class="view-header">
 		<div class="container">
 			<div class="logo-wrapper">
-				<img alt="Videoso logo" src="@/assets/logo.png">
+				<router-link to="/">
+					<img alt="Videoso logo" src="@/assets/logo.png">
+				</router-link>
 			</div>
 			<div class="search-wrapper">
 				<input
@@ -42,6 +44,13 @@
 		left: 0;
 		width: 25%;
 		padding: 0 0 0 0.4rem;
+
+		a {
+			display: block;
+			width: 14rem;
+			height: 7.2rem;
+			overflow: hidden;
+		}
 
 		img {
 			width: auto;
