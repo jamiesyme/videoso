@@ -3,6 +3,9 @@
 		<div class="container" v-if="video">
 			<section class="video-section">
 				<div class="video-wrapper aspect-16-9">
+					<video controls>
+						<source :src="video.videoUrl">
+					</video>
 				</div>
 				<div class="primary-info">
 					<h1>{{ video.title }}</h1>
@@ -93,10 +96,10 @@
 						return !sameId && sameCat;
 					}).map(vid => {
 						return Object.assign(
-							ContentUtils.expandVideo(Content, vid),
 							{
 								thumbnailUrl: dummyThumbUrl,
 							},
+							ContentUtils.expandVideo(Content, vid),
 						);
 					});
 
@@ -147,6 +150,16 @@
 
 		.video-wrapper {
 			background-color: black;
+			position: relative;
+
+			video {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				object-fit: contain;
+			}
 		}
 
 		.primary-info {

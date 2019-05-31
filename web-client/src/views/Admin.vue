@@ -197,6 +197,22 @@
 												v-model="video.duration" />
 										</td>
 									</tr>
+									<tr>
+										<td>Video URL</td>
+										<td>
+											<LabelInput
+												type="text"
+												v-model="video.videoUrl" />
+										</td>
+									</tr>
+									<tr>
+										<td>Thumbnail URL</td>
+										<td>
+											<LabelInput
+												type="text"
+												v-model="video.thumbnailUrl" />
+										</td>
+									</tr>
 								</table>
 							</td>
 							<td class="delete-td">
@@ -286,6 +302,8 @@
 					 * @property {string} category - category.title
 					 * @property {string} author - user.name
 					 * @property {string} duration - mm:ss
+					 * @property {string} videoUrl
+					 * @property {string} thumbnailUrl
 					 */
 				],
 			};
@@ -307,15 +325,17 @@
 					const usr = this.users.find(u => u.id === v.author);
 					const dur = this.durationToStr(v.duration);
 					return {
-						id:          v.id,
-						title:       v.title,
-						description: v.description,
-						tags:        v.tags.join(' '),
-						publishedAt: pub,
-						viewCount:   v.viewCount,
-						category:    cat.title,
-						author:      usr.name,
-						duration:    dur,
+						id:           v.id,
+						title:        v.title,
+						description:  v.description,
+						tags:         v.tags.join(' '),
+						publishedAt:  pub,
+						viewCount:    v.viewCount,
+						category:     cat.title,
+						author:       usr.name,
+						duration:     dur,
+						videoUrl:     v.videoUrl,
+						thumbnailUrl: v.thumbnailUrl,
 					};
 				});
 				this.loading = false;
@@ -331,15 +351,17 @@
 					const usr = this.findUserByName(v.author);
 					const dur = this.strToDuration(v.duration);
 					return {
-						id:          v.id,
-						title:       v.title,
-						description: v.description,
-						tags:        v.tags.split(' '),
-						publishedAt: pub,
-						viewCount:   v.viewCount,
-						category:    cat.id,
-						author:      usr.id,
-						duration:    dur,
+						id:           v.id,
+						title:        v.title,
+						description:  v.description,
+						tags:         v.tags.split(' '),
+						publishedAt:  pub,
+						viewCount:    v.viewCount,
+						category:     cat.id,
+						author:       usr.id,
+						duration:     dur,
+						videoUrl:     v.videoUrl,
+						thumbnailUrl: v.thumbnailUrl,
 					};
 				});
 				await Content.save();
@@ -411,6 +433,8 @@
 					category: null,
 					author: null,
 					duration: '00:00',
+					videoUrl: null,
+					thumbnailUrl: null,
 				});
 			},
 

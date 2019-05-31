@@ -53,10 +53,10 @@
 						return vid.category === cat.id;
 					}).map(vid => {
 						return Object.assign(
-							ContentUtils.expandVideo(Content, vid),
 							{
 								thumbnailUrl: dummyThumbUrl,
 							},
+							ContentUtils.expandVideo(Content, vid),
 						);
 					}),
 				});
