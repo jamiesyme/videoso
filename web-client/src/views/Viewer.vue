@@ -136,25 +136,6 @@
 </script>
 
 <style lang="scss" scoped>
-	hr {
-		border-color: #eee;
-	}
-
-	.aspect-16-9 {
-		width: 100%;
-		&::before {
-			content: '';
-			width: 100%;
-			padding-top: 56.25%;
-			float: left;
-		}
-		&::after {
-			content: '';
-			clear: left;
-			display: block;
-		}
-	}
-
 	.container {
 		display: flex;
 		padding: 0;

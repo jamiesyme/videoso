@@ -84,7 +84,6 @@
 		}
 
 		hr {
-			border-color: #eee;
 			margin: 6rem 0 2rem;
 		}
 

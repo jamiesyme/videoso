@@ -189,6 +189,14 @@
 												v-model="video.author" />
 										</td>
 									</tr>
+									<tr>
+										<td>Duration</td>
+										<td>
+											<LabelInput
+												type="text"
+												v-model="video.duration" />
+										</td>
+									</tr>
 								</table>
 							</td>
 							<td class="delete-td">
@@ -277,6 +285,7 @@
 					 * @property {number} viewCount
 					 * @property {string} category - category.title
 					 * @property {string} author - user.name
+					 * @property {string} duration - mm:ss
 					 */
 				],
 			};
@@ -296,6 +305,7 @@
 					const pub = new Date(Date.parse(v.publishedAt));
 					const cat = this.categories.find(c => c.id === v.category);
 					const usr = this.users.find(u => u.id === v.author);
+					const dur = this.durationToStr(v.duration);
 					return {
 						id:          v.id,
 						title:       v.title,
@@ -305,6 +315,7 @@
 						viewCount:   v.viewCount,
 						category:    cat.title,
 						author:      usr.name,
+						duration:    dur,
 					};
 				});
 				this.loading = false;
@@ -318,6 +329,7 @@
 					const pub = v.publishedAt.toISOString();
 					const cat = this.findCategoryByTitle(v.category);
 					const usr = this.findUserByName(v.author);
+					const dur = this.strToDuration(v.duration);
 					return {
 						id:          v.id,
 						title:       v.title,
@@ -327,6 +339,7 @@
 						viewCount:   v.viewCount,
 						category:    cat.id,
 						author:      usr.id,
+						duration:    dur,
 					};
 				});
 				await Content.save();
@@ -397,6 +410,7 @@
 					viewCount: 0,
 					category: null,
 					author: null,
+					duration: '00:00',
 				});
 			},
 
@@ -416,6 +430,44 @@
 					minute: '2-digit',
 					hour12: true,
 				});
+			},
+
+			durationToStr (seconds) {
+				function pad2 (num) {
+					return num.toString().padStart(2, '0');
+				}
+				const secs = Math.floor(seconds % 60);
+				const mins = Math.floor(seconds / 60);
+				const hrs = Math.floor(seconds / 60 / 60);
+				if (hrs > 0) {
+					return `${pad2(hrs)}:${pad2(mins)}:${pad2(secs)}`;
+				} else {
+					return `${pad2(mins)}:${pad2(secs)}`;
+				}
+			},
+
+			strToDuration (str) {
+				const parts = str.split(':');
+				let hrs = 0;
+				let mins = 0;
+				let secs = 0;
+				switch (parts.length) {
+					case 1:
+						secs = parseInt(parts[0]);
+						break;
+					case 2:
+						mins = parseInt(parts[0]);
+						secs = parseInt(parts[1]);
+						break;
+					case 3:
+						hrs = parseInt(parts[0]);
+						mins = parseInt(parts[1]);
+						secs = parseInt(parts[2]);
+						break;
+					default:
+						throw new Error();
+				}
+				return (hrs * 60 + mins) * 60 + secs;
 			},
 		},
 	}
@@ -439,10 +491,6 @@
 			width: 100%;
 			text-align: left;
 			padding: 0 1rem;
-		}
-
-		hr {
-			border-color: #eee;
 		}
 	}
 
