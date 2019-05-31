@@ -8,7 +8,7 @@
 				<div class="video-list">
 					<VideoLink
 						:video="video"
-						:key="video.title"
+						:key="video.id"
 						v-for="video in category.videos">
 					</VideoLink>
 				</div>
@@ -19,6 +19,8 @@
 </template>
 
 <script>
+	import Content from '@/content';
+	import ContentUtils from '@/utils/content';
 	import ViewHeader from '@/components/ViewHeader';
 	import VideoLink from '@/components/VideoLink';
 
@@ -36,56 +38,29 @@
 			};
 		},
 
-		mounted () {
-			const dummyImgUrl = 'https://dummyimage.com/200x112/000/fff';
-			this.categories = [
-				{
-					title: 'People',
-					videos: [
-						{
-							title: 'Dummy 1',
-							thumbnailUrl: dummyImgUrl,
-						},
-						{
-							title: 'Dummy 2',
-							thumbnailUrl: dummyImgUrl,
-						},
-						{
-							title: 'Dummy 3',
-							thumbnailUrl: dummyImgUrl,
-						},
-						{
-							title: 'Dummy 4',
-							thumbnailUrl: dummyImgUrl,
-						},
-						{
-							title: 'Dummy 5',
-							thumbnailUrl: dummyImgUrl,
-						},
-						{
-							title: 'Dummy 6',
-							thumbnailUrl: dummyImgUrl,
-						},
-					],
-				},
-				{
-					title: 'Tech',
-					videos: [
-						{
-							title: 'Dummy 1',
-							thumbnailUrl: dummyImgUrl,
-						},
-						{
-							title: 'Dummy 2',
-							thumbnailUrl: dummyImgUrl,
-						},
-						{
-							title: 'Dummy 3',
-							thumbnailUrl: dummyImgUrl,
-						},
-					],
-				},
-			];
+		async mounted () {
+			const dummyThumbUrl = 'https://dummyimage.com/200x112/000/fff';
+
+			// Load content (if hasn't already been loaded)
+			if (Content.categories.length < 1) {
+				await Content.load();
+			}
+
+			// Fill categories from content
+			this.categories = Content.categories.map(cat => {
+				return Object.assign({}, cat, {
+					videos: Content.videos.filter(vid => {
+						return vid.category === cat.id;
+					}).map(vid => {
+						return Object.assign(
+							ContentUtils.expandVideo(Content, vid),
+							{
+								thumbnailUrl: dummyThumbUrl,
+							},
+						);
+					}),
+				});
+			});
 		},
 	}
 </script>
@@ -109,6 +84,7 @@
 		}
 
 		hr {
+			border-color: #eee;
 			margin: 6rem 0 2rem;
 		}
 
@@ -117,6 +93,10 @@
 			grid-template-columns: 1fr 1fr 1fr 1fr;
 			grid-column-gap: 0.4rem;
 			grid-row-gap: 2.4rem;
+		}
+
+		.video-link {
+			font-size: 1.4rem;
 		}
 	}
 </style>

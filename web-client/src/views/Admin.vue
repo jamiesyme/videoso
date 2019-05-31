@@ -234,6 +234,13 @@
 	import Content from '@/content';
 
 	export default {
+		props: {
+			section: {
+				type: String,
+				default: 'categories',
+			},
+		},
+
 		components: {
 			IonAdd,
 			IonClose,
@@ -242,7 +249,6 @@
 
 		data () {
 			return {
-				section: 'categories',
 				loading: false,
 				saving: false,
 				categories: [
@@ -277,25 +283,10 @@
 		},
 
 		async mounted () {
-			this.updateSectionByPath();
 			await this.loadContent();
 		},
 
 		methods: {
-			updateSectionByPath () {
-				switch (this.$route.path) {
-					case '/admin/users':
-						this.section = 'users';
-						break;
-					case '/admin/videos':
-						this.section = 'videos';
-						break;
-					default:
-						this.section = 'categories';
-						break;
-				}
-			},
-
 			async loadContent () {
 				this.loading = true;
 				await Content.load();
@@ -425,12 +416,6 @@
 					minute: '2-digit',
 					hour12: true,
 				});
-			},
-		},
-
-		watch: {
-			'$route': function () {
-				this.updateSectionByPath();
 			},
 		},
 	}
