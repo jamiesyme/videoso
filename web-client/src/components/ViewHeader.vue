@@ -36,7 +36,7 @@
 	.view-header {
 		height: 7.2rem;
 		line-height: 7.2rem;
-		border-bottom: 0.1rem solid #eee;
+		border-bottom: 0.1rem solid #d6d6d6;
 	}
 
 	.logo-wrapper {

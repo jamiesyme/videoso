@@ -543,7 +543,7 @@
 					.ion {
 						position: relative;
 						top: 0.6rem;
-						margin: 0 0.6rem;
+						margin: 0 0.6rem 0 0;
 					}
 				}
 			}

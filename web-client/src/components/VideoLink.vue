@@ -75,7 +75,7 @@
 			bottom: 0.4rem;
 			right: 0.4rem;
 			padding: 0 0.4rem;
-			font-size: 1.4rem;
+			font-size: 1.3rem;
 			font-weight: bold;
 		}
 	}

@@ -57,7 +57,7 @@
 	.note {
 		//background-color: #ece6f2;
 		//background-color: #DEF3FA;
-		background-color: #E0F4E9;
+		background-color: #E6F6ED;
 		//border: 0.2rem solid #9b4dca;
 		//border: 0.2rem solid #40bae3;
 		border: 0.2rem solid #60C78F;
