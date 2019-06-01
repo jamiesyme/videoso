@@ -69,21 +69,25 @@
 		}
 
 		.duration {
-			background-color: rgba(0, 0, 0, 0.4);
-			color: #eee;
+			background-color: rgba(0, 0, 0, 0.6);
+			color: rgba(255, 255, 255, 0.8);
 			position: absolute;
-			bottom: 0;
-			right: 0;
-			padding: 0.2rem 0.6rem;
+			bottom: 0.4rem;
+			right: 0.4rem;
+			padding: 0 0.4rem;
+			font-size: 1.4rem;
+			font-weight: bold;
 		}
 	}
 
 	.video-title {
+		font-size: 1.4rem;
 		font-weight: bold;
-		margin: 0.4rem 0 0;
+		margin: 0.8rem 0 0;
 	}
 
 	.video-publisher {
 		color: #606c76;
+		font-size: 1.3rem;
 	}
 </style>

@@ -2,8 +2,11 @@
 	<div class="viewer-view">
 		<div class="container" v-if="video">
 			<section class="video-section">
-				<div class="video-wrapper aspect-16-9">
-					<video controls>
+				<div class="video-wrapper _aspect-16-9">
+					<video
+						playsinline
+						controls
+						ref="video">
 						<source :src="video.videoUrl">
 					</video>
 				</div>
@@ -49,6 +52,7 @@
 </template>
 
 <script>
+	import Plyr from 'plyr';
 	import Content from '@/content';
 	import ContentUtils from '@/utils/content';
 	import VideoLink from '@/components/VideoLink';
@@ -101,6 +105,25 @@
 							},
 							ContentUtils.expandVideo(Content, vid),
 						);
+					});
+
+					this.$nextTick(() => {
+						if (this.$refs.video) {
+							new Plyr(this.$refs.video, {
+								controls: [
+									'play-large',
+									'play',
+									'progress',
+									'current-time',
+									'mute',
+									'volume',
+									'captions',
+									'settings',
+									'airplay',
+									'fullscreen',
+								]
+							});
+						}
 					});
 
 				} else {
@@ -207,10 +230,6 @@
 			letter-spacing: -0.08rem;
 			line-height: 1.35;
 			margin-bottom: 1.5rem;
-		}
-
-		.video-link {
-			font-size: 1.4rem;
 		}
 	}
 </style>

@@ -93,9 +93,5 @@
 			grid-column-gap: 0.4rem;
 			grid-row-gap: 2.4rem;
 		}
-
-		.video-link {
-			font-size: 1.4rem;
-		}
 	}
 </style>
