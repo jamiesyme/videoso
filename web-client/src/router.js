@@ -1,7 +1,6 @@
 import Vue from 'vue';
 import Router from 'vue-router';
 import Home from './views/Home.vue';
-import Viewer from './views/Viewer.vue';
 
 Vue.use(Router);
 
@@ -17,7 +16,12 @@ export default new Router({
 		{
 			path: '/video/:videoId',
 			name: 'viewer',
-			component: Viewer
+			component: () => import(/* webpackChunkName: "viewer" */ '@/views/Viewer')
+		},
+		{
+			path: '/channel/:userName',
+			name: 'channel',
+			component: () => import(/* webpackChunkName: "channel" */ '@/views/Channel')
 		},
 		{
 			path: '/login',

@@ -2,36 +2,7 @@
 	<div class="viewer-view">
 		<div class="container" v-if="video">
 			<section class="video-section">
-				<div class="video-wrapper _aspect-16-9">
-					<video
-						playsinline
-						controls
-						ref="video">
-						<source :src="video.videoUrl">
-					</video>
-				</div>
-				<div class="primary-info">
-					<h1>{{ video.title }}</h1>
-					<div class="view-count">
-						{{ formatViewCount(video.viewCount) }}
-					</div>
-				</div>
-				<div class="secondary-info">
-					<div class="publish-info">
-						Published by
-						<router-link :to="`/channel/${video.author.name}`">
-							{{ video.author.name }}
-						</router-link>
-						on
-						{{ formatDate(video.publishedAt) }}
-					</div>
-					<div class="description" v-if="video.description">
-						{{ video.description }}
-					</div>
-					<div class="description empty-description" v-else>
-						No description.
-					</div>
-				</div>
+				<VideoViewer :video="video"></VideoViewer>
 				<hr>
 			</section>
 			<section class="related-section">
@@ -52,14 +23,15 @@
 </template>
 
 <script>
-	import Plyr from 'plyr';
 	import Content from '@/content';
 	import ContentUtils from '@/utils/content';
 	import VideoLink from '@/components/VideoLink';
+	import VideoViewer from '@/components/VideoViewer';
 
 	export default {
 		components: {
 			VideoLink,
+			VideoViewer,
 		},
 
 		data () {
@@ -107,47 +79,10 @@
 						);
 					});
 
-					this.$nextTick(() => {
-						if (this.$refs.video) {
-							new Plyr(this.$refs.video, {
-								controls: [
-									'play-large',
-									'play',
-									'progress',
-									'current-time',
-									'mute',
-									'volume',
-									'captions',
-									'settings',
-									'airplay',
-									'fullscreen',
-								]
-							});
-						}
-					});
-
 				} else {
 					this.video = null;
 					this.relatedVideos = [];
 				}
-			},
-
-			formatDate (date) {
-				return date.toLocaleString('en-US', {
-					month: 'short',
-					day: 'numeric',
-					year: 'numeric',
-				});
-			},
-
-			formatViewCount (viewCount) {
-				if (viewCount === 0) {
-					return 'No views';
-				}
-				if (viewCount === 1) {
-					return '1 view';
-				}
-				return `${viewCount} views`;
 			},
 		},
 
@@ -170,55 +105,6 @@
 
 	.video-section {
 		flex: 1 1 75%;
-
-		.video-wrapper {
-			background-color: black;
-			position: relative;
-
-			video {
-				position: absolute;
-				top: 0;
-				left: 0;
-				width: 100%;
-				height: 100%;
-				object-fit: contain;
-			}
-		}
-
-		.primary-info {
-			display: flex;
-			margin: 2rem 0;
-			padding: 0 1rem;
-
-			h1 {
-				flex: 1;
-				font-size: 3.2rem;
-				margin: 0;
-			}
-
-			.view-count {
-				font-size: 2.0rem;
-			}
-		}
-
-		.secondary-info {
-			font-size: 1.4rem;
-			padding: 0 1rem;
-
-			.publish-info {
-				a {
-					font-weight: bold;
-				}
-			}
-
-			.description {
-				margin: 2rem 0 0;
-			}
-
-			.empty-description {
-				font-style: italic;
-			}
-		}
 	}
 
 	.related-section {
