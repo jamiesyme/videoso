@@ -24,6 +24,11 @@ export default new Router({
 			component: () => import(/* webpackChunkName: "channel" */ '@/views/Channel')
 		},
 		{
+			path: '/search',
+			name: 'search',
+			component: () => import(/* webpackChunkName: "search" */ '@/views/Search')
+		},
+		{
 			path: '/login',
 			name: 'login',
 			component: () => import(/* webpackChunkName: "login" */ '@/views/Login')

@@ -6,12 +6,15 @@
 					<img alt="Videoso logo" src="@/assets/logo.png">
 				</router-link>
 			</div>
-			<div class="search-wrapper">
+			<form
+				class="search-wrapper"
+				@submit.prevent="goToSearch()">
 				<input
 					type="text"
+					ref="searchInput"
 					placeholder="Search"
-					v-if="showSearch">
-			</div>
+					v-show="showSearch">
+			</form>
 			<div class="login-wrapper">
 				<router-link to="/login" class="button button-clear">
 					Log in
@@ -27,6 +30,19 @@
 			showSearch: {
 				type: Boolean,
 				default: true,
+			},
+		},
+
+		methods: {
+			goToSearch () {
+				const q = this.$refs.searchInput.value;
+				if (q) {
+					this.$router.push({
+						path: '/search',
+						query: { q },
+					});
+					this.$refs.searchInput.blur();
+				}
 			},
 		},
 	}
