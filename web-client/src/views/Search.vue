@@ -1,7 +1,12 @@
 <template>
 	<div class="search-view">
 		<div class="container">
-			<h1>Showing search results for: {{ query }}</h1>
+			<h1 v-if="videos.length > 0">
+				Showing search results for: {{ query }}
+			</h1>
+			<h1 v-else>
+				No search results for: {{ query }}
+			</h1>
 			<div class="video-list">
 				<VideoLink
 					:video="video"
@@ -14,6 +19,7 @@
 </template>
 
 <script>
+	import FlexSearch from 'flexsearch';
 	import Content from '@/content';
 	import ContentUtils from '@/utils/content';
 	import VideoLink from '@/components/VideoLink';
@@ -25,7 +31,7 @@
 
 		data () {
 			return {
-				videos: [],
+				searchIndex: null,
 			};
 		},
 
@@ -35,15 +41,58 @@
 
 		methods: {
 			async refreshContent () {
-				const dummyThumbUrl = 'https://dummyimage.com/200x112/000/fff';
 
 				// Load content (if hasn't already been loaded)
 				if (Content.videos.length === 0) {
 					await Content.load();
 				}
 
-				// Fill videos from content
-				this.videos = Content.videos.map(vid => {
+				// Build the search index
+				this.searchIndex = new FlexSearch('match', {
+					doc: {
+						id: 'id',
+						field: [
+							'title',
+							'description',
+							'tags',
+							'category',
+							'author',
+						],
+					},
+				});
+				this.searchIndex.add(Content.videos.map(vid => {
+					const fullVid = ContentUtils.expandVideo(Content, vid);
+					return {
+						id:          fullVid.id,
+						title:       fullVid.title,
+						description: fullVid.description,
+						tags:        fullVid.tags.join(' '),
+						category:    fullVid.category.title,
+						author:      fullVid.author.name,
+					};
+				}));
+			},
+		},
+
+		computed: {
+			query () {
+				return this.$route.query.q;
+			},
+
+			videos () {
+				const dummyThumbUrl = 'https://dummyimage.com/200x112/000/fff';
+
+				// We need an index to search
+				if (!this.searchIndex) {
+					return [];
+				}
+
+				// Search videos
+				const results = this.searchIndex.search(this.query);
+
+				// Translate search results
+				return results.map(searchVid => {
+					const vid = Content.videos.find(v => v.id === searchVid.id);
 					return Object.assign(
 						{
 							thumbnailUrl: dummyThumbUrl,
@@ -54,12 +103,6 @@
 						},
 					);
 				});
-			},
-		},
-
-		computed: {
-			query () {
-				return this.$route.query.q;
 			},
 		},
 	}
