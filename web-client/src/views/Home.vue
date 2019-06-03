@@ -34,22 +34,28 @@
 
 		data () {
 			return {
-				categories: [],
+				content: null,
 			};
 		},
 
 		async mounted () {
-			const dummyThumbUrl = 'https://dummyimage.com/200x112/000/fff';
-
 			// Load content (if hasn't already been loaded)
-			if (Content.categories.length < 1) {
+			if (Content.categories.length === 0) {
 				await Content.load();
 			}
+			this.content = Content;
+		},
 
-			// Fill categories from content
-			this.categories = Content.categories.map(cat => {
-				return Object.assign({}, cat, {
-					videos: Content.videos.filter(vid => {
+		computed: {
+			categories () {
+				const dummyThumbUrl = 'https://dummyimage.com/200x112/000/fff';
+
+				if (!this.content) {
+					return [];
+				}
+
+				return this.content.categories.map(cat => {
+					const videos = this.content.videos.filter(vid => {
 						return vid.category === cat.id;
 					}).map(vid => {
 						return Object.assign(
@@ -58,9 +64,10 @@
 							},
 							ContentUtils.expandVideo(Content, vid),
 						);
-					}),
+					});
+					return Object.assign({}, cat, { videos });
 				});
-			});
+			},
 		},
 	}
 </script>

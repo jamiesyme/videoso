@@ -22,10 +22,6 @@
 
 <script>
 	export default {
-		data () {
-			return {};
-		},
-
 		methods: {
 			goToAdmin () {
 				this.$router.push('admin');

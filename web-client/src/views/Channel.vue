@@ -8,11 +8,11 @@
 				<h1>{{ user.name }}'s Channel</h1>
 			</div>
 		</section>
-		<div class="container" v-if="video">
+		<div class="container" v-if="userVideos.length > 0">
 			<section class="video-section">
 				<VideoViewer
-					:video="video"
-					v-if="video">
+					:video="primaryVideo"
+					v-if="primaryVideo">
 				</VideoViewer>
 				<hr>
 			</section>
@@ -47,71 +47,81 @@
 
 		data () {
 			return {
-				user: null,
-				video: null,
-				otherVideos: [],
+				content: null,
 			};
 		},
 
-		mounted () {
-			this.refreshContent();
+		async mounted () {
+			// Load content (if hasn't already been loaded)
+			if (Content.users.length === 0) {
+				await Content.load();
+			}
+			this.content = Content;
 		},
 
-		methods: {
-			async refreshContent () {
-				const dummyBannerUrl = 'https://dummyimage.com/1920x200/eee/e6e6e6';
-				const dummyThumbUrl = 'https://dummyimage.com/200x112/000/fff';
+		computed: {
+			userName () {
+				return this.$route.params.userName;
+			},
 
-				// Load content (if hasn't already been loaded)
-				if (Content.users.length === 0) {
-					await Content.load();
+			user () {
+				const dummyBannerUrl = 'https://dummyimage.com/1920x200/eee/e6e6e6';
+
+				if (!this.userName) {
+					return null;
+				}
+				if (!this.content) {
+					return null;
 				}
 
-				// Find the user
-				this.user = Content.users.find(user => {
+				const user = this.content.users.find(user => {
 					function tr (str) {
 						return str.trim().toLowerCase();
 					}
-					const routeName = tr(this.$route.params.userName);
-					const userName = tr(user.name);
-					return routeName === userName;
+					return tr(this.userName) === tr(user.name);
 				});
-				if (!this.user) {
-					this.videos = null;
-					this.otherVideos = [];
-					return;
-				} else {
-					if (!this.user.bannerUrl) {
-						this.user.bannerUrl = dummyBannerUrl;
-					}
+				if (!user) {
+					return null;
 				}
 
-				// Find the user's videos
-				const userVideos = Content.videos.filter(vid => {
+				if (!user.bannerUrl) {
+					user.bannerUrl = dummyBannerUrl;
+				}
+
+				return user;
+			},
+
+			userVideos () {
+				const dummyThumbUrl = 'https://dummyimage.com/200x112/000/fff';
+
+				if (!this.user) {
+					return [];
+				}
+				if (!this.content) {
+					return [];
+				}
+
+				return this.content.videos.filter(vid => {
 					return vid.author === this.user.id;
 				}).map(vid => {
 					return Object.assign(
 						{
 							thumbnailUrl: dummyThumbUrl,
 						},
-						ContentUtils.expandVideo(Content, vid),
+						ContentUtils.expandVideo(this.content, vid),
 						{
 							publishedAt: new Date(vid.publishedAt),
 						},
 					);
 				});
-
-				// Separate the first video from the rest
-				this.video = userVideos[0];
-				this.otherVideos = userVideos.slice(1);
 			},
-		},
 
-		watch: {
-			'$route.params': function (newParams, oldParams) {
-				if (newParams.userName !== oldParams.userName) {
-					this.refreshContent();
-				}
+			primaryVideo () {
+				return this.userVideos[0];
+			},
+
+			otherVideos () {
+				return this.userVideos.slice(1);
 			},
 		},
 	}

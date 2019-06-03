@@ -31,24 +31,29 @@
 
 		data () {
 			return {
-				searchIndex: null,
+				content: null,
 			};
 		},
 
-		mounted () {
-			this.refreshContent();
+		async mounted () {
+			// Load content (if hasn't already been loaded)
+			if (Content.videos.length === 0) {
+				await Content.load();
+			}
+			this.content = Content;
 		},
 
-		methods: {
-			async refreshContent () {
+		computed: {
+			query () {
+				return this.$route.query.q;
+			},
 
-				// Load content (if hasn't already been loaded)
-				if (Content.videos.length === 0) {
-					await Content.load();
+			searchIndex () {
+				if (!this.content) {
+					return null;
 				}
 
-				// Build the search index
-				this.searchIndex = new FlexSearch('match', {
+				const searchIndex = new FlexSearch('match', {
 					doc: {
 						id: 'id',
 						field: [
@@ -60,8 +65,8 @@
 						],
 					},
 				});
-				this.searchIndex.add(Content.videos.map(vid => {
-					const fullVid = ContentUtils.expandVideo(Content, vid);
+				searchIndex.add(this.content.videos.map(vid => {
+					const fullVid = ContentUtils.expandVideo(this.content, vid);
 					return {
 						id:          fullVid.id,
 						title:       fullVid.title,
@@ -71,19 +76,17 @@
 						author:      fullVid.author.name,
 					};
 				}));
-			},
-		},
-
-		computed: {
-			query () {
-				return this.$route.query.q;
+				return searchIndex;
 			},
 
 			videos () {
 				const dummyThumbUrl = 'https://dummyimage.com/200x112/000/fff';
 
-				// We need an index to search
+				// We need an index (and content) to search
 				if (!this.searchIndex) {
+					return [];
+				}
+				if (!this.content) {
 					return [];
 				}
 
@@ -92,12 +95,12 @@
 
 				// Translate search results
 				return results.map(searchVid => {
-					const vid = Content.videos.find(v => v.id === searchVid.id);
+					const vid = this.content.videos.find(v => v.id === searchVid.id);
 					return Object.assign(
 						{
 							thumbnailUrl: dummyThumbUrl,
 						},
-						ContentUtils.expandVideo(Content, vid),
+						ContentUtils.expandVideo(this.content, vid),
 						{
 							publishedAt: new Date(vid.publishedAt),
 						},

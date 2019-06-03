@@ -36,61 +36,64 @@
 
 		data () {
 			return {
-				video: null,
-				relatedVideos: [],
+				content: null,
 			};
 		},
 
-		mounted () {
-			this.refreshContent();
+		async mounted () {
+			// Load content (if hasn't already been loaded)
+			if (Content.videos.length === 0) {
+				await Content.load();
+			}
+			this.content = Content;
 		},
 
-		methods: {
-			async refreshContent () {
+		computed: {
+			videoId () {
+				return this.$route.params.videoId;
+			},
+
+			video () {
+				if (!this.videoId) {
+					return null;
+				}
+				if (!this.content) {
+					return null;
+				}
+
+				const video = this.content.videos.find(vid => {
+					return vid.id == this.videoId;
+				});
+				return Object.assign(
+					ContentUtils.expandVideo(this.content, video),
+					{
+						publishedAt: new Date(video.publishedAt),
+					},
+				);
+			},
+
+			relatedVideos () {
 				const dummyThumbUrl = 'https://dummyimage.com/200x112/000/fff';
 
-				// Load content (if hasn't already been loaded)
-				if (Content.videos.length === 0) {
-					await Content.load();
+				if (!this.videoId) {
+					return null;
+				}
+				if (!this.content) {
+					return null;
 				}
 
-				// Fill videos from content
-				const rawVideo = Content.videos.find(vid => {
-					return vid.id == this.$route.params.videoId;
-				});
-				if (rawVideo) {
-					this.video = Object.assign(
-						ContentUtils.expandVideo(Content, rawVideo),
+				return this.content.videos.filter(vid => {
+					const sameId = vid.id === this.video.id;
+					const sameCat = vid.category === this.video.category.id;
+					return !sameId && sameCat;
+				}).map(vid => {
+					return Object.assign(
 						{
-							publishedAt: new Date(rawVideo.publishedAt),
+							thumbnailUrl: dummyThumbUrl,
 						},
+						ContentUtils.expandVideo(this.content, vid),
 					);
-
-					this.relatedVideos = Content.videos.filter(vid => {
-						const sameId = vid.id === rawVideo.id;
-						const sameCat = vid.category === rawVideo.category;
-						return !sameId && sameCat;
-					}).map(vid => {
-						return Object.assign(
-							{
-								thumbnailUrl: dummyThumbUrl,
-							},
-							ContentUtils.expandVideo(Content, vid),
-						);
-					});
-
-				} else {
-					this.video = null;
-					this.relatedVideos = [];
-				}
-			},
-		},
-
-		watch: {
-			'$route.params': function (newParams, oldParams) {
-				if (newParams.videoId !== oldParams.videoId) {
-					this.refreshContent();
-				}
+				});
 			},
 		},
 	}
@@ -116,6 +119,10 @@
 			letter-spacing: -0.08rem;
 			line-height: 1.35;
 			margin-bottom: 1.5rem;
+		}
+
+		.video-link {
+			margin-bottom: 2rem;
 		}
 	}
 </style>
