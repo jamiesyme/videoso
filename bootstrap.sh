@@ -9,3 +9,6 @@ sudo npm i -g @vue/cli
 sudo add-apt-repository -y ppa:jonathonf/ffmpeg-4
 sudo apt-get update
 sudo apt-get install -y ffmpeg
+
+# Install ImageMagick
+sudo apt-get install -y imagemagick

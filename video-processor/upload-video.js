@@ -2,12 +2,7 @@ const exec = require('util').promisify(require('child_process').exec);
 const fs   = require('fs-extra');
 const path = require('path');
 const tmp  = require('tmp-promise');
-const B2   = require('backblaze-b2');
-
-let b2Client;
-let b2BucketName;
-let b2BucketId;
-const tmpDir = path.resolve('./tmp');
+const B2   = require('./b2');
 
 function loadEnv () {
 	const res = require('dotenv').config();
@@ -17,44 +12,11 @@ function loadEnv () {
 }
 
 async function initB2 () {
-	b2Client = new B2({
-		accountId: process.env.B2_ACCOUNT_ID,
+	await B2.init({
+		accountId:      process.env.B2_ACCOUNT_ID,
 		applicationKey: process.env.B2_APPLICATION_KEY,
+		bucket:         'videoso',
 	});
-	await b2Client.authorize();
-
-	b2BucketName = 'videoso';
-	const res = await b2Client.getBucket({ bucketName: b2BucketName });
-	if (res.data &&
-	    res.data.buckets &&
-	    res.data.buckets.length > 0 &&
-	    res.data.buckets[0].bucketId) {
-		b2BucketId = res.data.buckets[0].bucketId;
-	} else {
-		throw new Error('failed to get bucket id');
-	}
-}
-
-async function uploadFile (fsPath, b2Path) {
-	const fileBuffer = await fs.readFile(fsPath);
-	const uploadUrlRes = await b2Client.getUploadUrl({
-		bucketId: b2BucketId,
-	});
-	try {
-		await b2Client.uploadFile({
-			uploadUrl:       uploadUrlRes.data.uploadUrl,
-			uploadAuthToken: uploadUrlRes.data.authorizationToken,
-			fileName:        b2Path,
-			data:            fileBuffer,
-		});
-		return `${b2Client.downloadUrl}/file/${b2BucketName}/${b2Path}`;
-	} catch (err) {
-		if (err.response.status === 503) {
-			return await uploadFile(fsPath, b2Path);
-		} else {
-			throw err;
-		}
-	}
 }
 
 async function processVideo (videoPath, dashDir) {
@@ -64,15 +26,29 @@ async function processVideo (videoPath, dashDir) {
 	await fs.symlink(videoPath, localVideoPath);
 	await exec(`./transcode-video.sh "${localVideoPath}"`);
 
-	// Generate MPD
-	const mpdPath = `${dashDir}/playlist.mpd`;
-	const transcodedVideoPaths = [
-		`${dashDir}/input_video_360_28.mp4`,
-		`${dashDir}/input_video_480_23.mp4`,
-		`${dashDir}/input_video_720_20.mp4`,
-		`${dashDir}/input_video_1080_18.mp4`,
+	// Rename transcoded videos
+	const rawTranscodedVideoPaths = [
+		`${dashDir}/input_video_360.mp4`,
+		`${dashDir}/input_video_480.mp4`,
+		`${dashDir}/input_video_720.mp4`,
+		`${dashDir}/input_video_1080.mp4`,
 		`${dashDir}/input_audio_192.m4a`,
 	];
+	const transcodedVideoPaths = [
+		`${dashDir}/video_360.mp4`,
+		`${dashDir}/video_480.mp4`,
+		`${dashDir}/video_720.mp4`,
+		`${dashDir}/video_1080.mp4`,
+		`${dashDir}/audio_192.m4a`,
+	];
+	for (let i = 0; i < transcodedVideoPaths.length; ++i) {
+		const p1 = rawTranscodedVideoPaths[i];
+		const p2 = transcodedVideoPaths[i];
+		await fs.move(p1, p2);
+	}
+
+	// Generate MPD
+	const mpdPath = `${dashDir}/playlist.mpd`;
 	const mpdCmd = [
 		'./generate-mpd.sh',
 		`"${mpdPath}"`,
@@ -103,7 +79,7 @@ async function main () {
 	const videoName = path.parse(videoBase).name;
 
 	console.log('Uploading raw video...');
-	const rawVideoUrl = await uploadFile(videoPath, `videos-raw/${videoBase}`);
+	const rawVideoUrl = await B2.uploadFile(videoPath, `videos-raw/${videoBase}`);
 	console.log('Raw video available at:', rawVideoUrl);
 
 	console.log('Processing video for MPEG-DASH...');
@@ -117,7 +93,7 @@ async function main () {
 		files.map(async fsPath => {
 			const dashBase = fsPath.substring(dir.path.length + 1);
 			const b2Path = `videos-dash/${videoName}/${dashBase}`;
-			const b2Url = await uploadFile(fsPath, b2Path);
+			const b2Url = await B2.uploadFile(fsPath, b2Path);
 			if (dashBase.includes('.mpd')) {
 				dashVideoUrl = b2Url;
 			}

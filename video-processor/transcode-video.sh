@@ -4,10 +4,10 @@
 #   ./transcode-video.sh path/to/input.mp4
 #
 # Output:
-#   creates path/to/input_video_360_28.mp4
-#   creates path/to/input_video_480_23.mp4
-#   creates path/to/input_video_720_20.mp4
-#   creates path/to/input_video_1080_17.mp4
+#   creates path/to/input_video_360.mp4
+#   creates path/to/input_video_480.mp4
+#   creates path/to/input_video_720.mp4
+#   creates path/to/input_video_1080.mp4
 #   creates path/to/input_audio_192.m4a
 #
 # This is really just an automation script using the follow ffmpeg command:
@@ -36,7 +36,7 @@ framerate=60
 gop_size=120
 
 function ffmpeg_video () {
-	ffmpeg -i "$input_name" -preset slow -an -c:v libx264 -r "$framerate" -crf "$3" -vf "scale=w=$1:h=$2:force_original_aspect_ratio=decrease, scale=w=trunc(iw/2)*2:h=trunc(ih/2)*2" -x264opts "keyint=$gop_size:min-keyint=$gop_size:no-scenecut" -pix_fmt yuv420p "${output_name_video_pre}_${2}_${3}${output_name_video_post}"
+	ffmpeg -i "$input_name" -preset slow -an -c:v libx264 -r "$framerate" -crf "$3" -vf "scale=w=$1:h=$2:force_original_aspect_ratio=decrease, scale=w=trunc(iw/2)*2:h=trunc(ih/2)*2" -x264opts "keyint=$gop_size:min-keyint=$gop_size:no-scenecut" -pix_fmt yuv420p "${output_name_video_pre}_${2}${output_name_video_post}"
 }
 
 function ffmpeg_audio () {
