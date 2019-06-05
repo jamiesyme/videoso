@@ -34,6 +34,7 @@
 </template>
 
 <script>
+	import DashJs from 'dashjs';
 	import Plyr from 'plyr';
 
 	export default {
@@ -54,8 +55,17 @@
 			video: Object,
 		},
 
+		data () {
+			return {
+				dash: null,
+				player: null,
+			};
+		},
+
 		mounted () {
-			new Plyr(this.$refs.video, {
+			this.dash = DashJs.MediaPlayer().create();
+			this.dash.initialize(null, null, false);
+			this.player = new Plyr(this.$refs.video, {
 				controls: [
 					'play-large',
 					'play',
@@ -69,9 +79,19 @@
 					'fullscreen',
 				]
 			});
+			this.updateVideoElement();
 		},
 
 		methods: {
+			updateVideoElement () {
+				this.dash.reset();
+				const isDashUrl = /\.mpd$/.test(this.video.videoUrl);
+				if (isDashUrl) {
+					this.dash.attachView(this.$refs.video);
+					this.dash.attachSource(this.video.videoUrl);
+				}
+			},
+
 			formatDate (date) {
 				return date.toLocaleString('en-US', {
 					month: 'short',
@@ -88,6 +108,12 @@
 					return '1 view';
 				}
 				return `${viewCount} views`;
+			},
+		},
+
+		watch: {
+			'video.videoUrl': function () {
+				updateVideoElement();
 			},
 		},
 	}
