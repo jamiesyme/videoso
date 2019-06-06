@@ -1,13 +1,15 @@
 <template>
 	<div class="login-view">
 		<div class="container">
-			<div class="short-container">
-				<h2>Log In</h2>
-				<form @submit.prevent="goToAdmin()">
-					<input type="email" placeholder="Email address">
-					<input type="password" placeholder="Password">
-					<button type="submit">Log in</button>
-				</form>
+			<div :class="shortContainerClasses">
+				<div>
+					<h2>Log In</h2>
+					<form @submit.prevent="goToAdmin()">
+						<input type="email" placeholder="Email address">
+						<input type="password" placeholder="Password">
+						<button type="submit">Log in</button>
+					</form>
+				</div>
 
 				<div class="note">
 					<p><strong>Note:</strong></p>
@@ -27,21 +29,31 @@
 				this.$router.push('admin');
 			},
 		},
+
+		computed: {
+			shortContainerClasses () {
+				const bp = this.$breakpoint.name;
+				const half = bp !== 'small';
+				return {
+					'short-container': true,
+					'short-container-half': half,
+				};
+			},
+		},
 	}
 </script>
 
 <style lang="scss" scoped>
-	.container {
-		padding: 0;
-	}
-
 	.short-container {
-		width: 33%;
-		margin: 0 auto;
+		margin: 4rem auto 6rem;
+
+		&.short-container-half {
+			width: 50%;
+		}
 	}
 
 	h2 {
-		margin: 4rem 0 2rem;
+		margin: 0 0 2rem;
 	}
 
 	button {
