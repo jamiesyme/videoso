@@ -71,9 +71,13 @@
 			},
 
 			videoListClasses () {
+				const bp = this.$breakpoint.name;
+				const multi2 = bp === 'medium';
+				const multi4 = bp === 'large' || bp === 'xlarge';
 				return {
 					'video-list': true,
-					'video-list-multi': this.$breakpoint.name !== 'small',
+					'video-list-multi-2': multi2,
+					'video-list-multi-4': multi4,
 				};
 			},
 
@@ -109,10 +113,16 @@
 		.video-list {
 			display: grid;
 			grid-template-columns: 1fr;
-			grid-row-gap: 2.4rem;
+			grid-row-gap: 4rem;
 
-			&.video-list-multi {
+			&.video-list-multi-2 {
 				grid-column-gap: 0.4rem;
+				grid-row-gap: 2.4rem;
+				grid-template-columns: 1fr 1fr;
+			}
+			&.video-list-multi-4 {
+				grid-column-gap: 0.4rem;
+				grid-row-gap: 2.4rem;
 				grid-template-columns: 1fr 1fr 1fr 1fr;
 			}
 		}

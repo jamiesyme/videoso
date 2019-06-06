@@ -1,17 +1,23 @@
 <template>
 	<div class="viewer-view">
-		<div class="container" v-if="video">
+		<div :class="containerClasses" v-if="video">
 			<section class="video-section">
-				<VideoViewer :video="video"></VideoViewer>
+				<VideoViewer
+					:video="video"
+					:extraWidth="videoViewerExtraWidth">
+				</VideoViewer>
 				<hr>
 			</section>
 			<section class="related-section">
 				<h2>Related Videos</h2>
-				<VideoLink
-					:video="video"
-					:key="video.id"
-					v-for="video in relatedVideos">
-				</VideoLink>
+				<div :class="relatedVideoListClasses">
+					<VideoLink
+						:video="video"
+						:extraWidth="relatedVideoLinkExtraWidth"
+						:key="video.id"
+						v-for="video in relatedVideos">
+					</VideoLink>
+				</div>
 				<hr>
 			</section>
 		</div>
@@ -95,25 +101,52 @@
 					);
 				});
 			},
+
+			containerClasses () {
+				const bp = this.$breakpoint.name;
+				const multi = bp !== 'small' && bp !== 'medium';
+				return {
+					'container': true,
+					'container-multi-column': multi,
+				};
+			},
+
+			videoViewerExtraWidth () {
+				const bp = this.$breakpoint.name;
+				const extra = bp === 'small' || bp === 'medium';
+				return extra ? '4rem' : null;
+			},
+
+			relatedVideoListClasses () {
+				const bp = this.$breakpoint.name;
+				const multi = bp === 'medium';
+				return {
+					'video-list': true,
+					'video-list-multi': multi,
+				};
+			},
+
+			relatedVideoLinkExtraWidth () {
+				const bp = this.$breakpoint.name;
+				const extra = bp === 'small';
+				return extra ? '4rem' : null;
+			},
 		},
 	}
 </script>
 
 <style lang="scss" scoped>
-	.container {
-		display: flex;
-		padding: 0;
-		margin: 4rem auto 6rem;
+	.viewer-view {
+		margin: 4rem 0 6rem;
 	}
 
-	.video-section {
-		flex: 1 1 75%;
+	.container.container-multi-column {
+		display: grid;
+		grid-template-columns: 3fr 1fr;
+		grid-column-gap: 3rem;
 	}
 
 	.related-section {
-		flex: 1 1 25%;
-		padding: 0 0 0 3rem;
-
 		h2 {
 			font-size: 2.2rem;
 			letter-spacing: -0.08rem;
@@ -121,8 +154,15 @@
 			margin-bottom: 1.5rem;
 		}
 
-		.video-link {
-			margin-bottom: 2rem;
+		.video-list {
+			display: grid;
+			grid-template-columns: 1fr;
+			grid-row-gap: 2.4rem;
+
+			&.video-list-multi {
+				grid-column-gap: 0.4rem;
+				grid-template-columns: 1fr 1fr;
+			}
 		}
 	}
 </style>

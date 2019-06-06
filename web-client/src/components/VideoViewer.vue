@@ -1,6 +1,8 @@
 <template>
 	<div class="video-viewer">
-		<div class="video-wrapper">
+		<div
+			class="video-wrapper"
+			:style="videoStyle">
 			<video
 				playsinline
 				controls
@@ -53,6 +55,12 @@
 			 * @property {Date}   publishedAt
 			 */
 			video: Object,
+
+			/**
+			 * Use on mobile to stretch video to edges of screen.
+			 * @param {string} extraWidth - '10px', '2rem', etc.
+			 */
+			extraWidth: String,
 		},
 
 		data () {
@@ -111,6 +119,20 @@
 			},
 		},
 
+		computed: {
+			videoStyle () {
+				if (this.extraWidth) {
+					return {
+						marginLeft: `calc(-0.5 * ${this.extraWidth})`,
+						width: `calc(100% + ${this.extraWidth})`,
+						borderTop: '0.1rem solid #eee',
+						borderBottom: '0.1rem solid #eee',
+					};
+				}
+				return null;
+			},
+		},
+
 		watch: {
 			'video.videoUrl': function () {
 				updateVideoElement();
@@ -137,7 +159,6 @@
 	.primary-info {
 		display: flex;
 		margin: 2rem 0;
-		//padding: 0 1rem;
 
 		h1 {
 			flex: 1;
@@ -147,12 +168,12 @@
 
 		.view-count {
 			font-size: 2.0rem;
+			margin-left: 2rem;
 		}
 	}
 
 	.secondary-info {
 		font-size: 1.4rem;
-		//padding: 0 1rem;
 
 		.publish-info {
 			a {
