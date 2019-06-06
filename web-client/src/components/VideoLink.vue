@@ -5,7 +5,10 @@
 		<div
 			class="thumbnail-wrapper aspect-16-9"
 			:style="thumbnailStyle">
-			<img :src="video.thumbnailUrl">
+			<img
+				:src="thumbnailSrc"
+				:srcset="thumbnailSrcSet"
+				:sizes="thumbnailSizes">
 			<div class="duration">
 				{{ formatDuration(video.duration) }}
 			</div>
@@ -24,12 +27,13 @@
 		props: {
 			/**
 			 * @typedef {object} Video
-			 * @property {number} id
-			 * @property {string} title
-			 * @property {string} thumbnailUrl
-			 * @property {object} author
-			 * @property {number} author.id
-			 * @property {string} author.name
+			 * @property {number}  id
+			 * @property {string}  title
+			 * @property {string}  thumbnailUrl
+			 * @property {boolean} responsiveThumbnails
+			 * @property {object}  author
+			 * @property {number}  author.id
+			 * @property {string}  author.name
 			 */
 			video: Object,
 
@@ -68,6 +72,48 @@
 				}
 				return null;
 			},
+
+			thumbnailSizes () {
+				if (this.video.responsiveThumbnails) {
+					return [
+						'(min-width: 900px) 25vw',
+						'(min-width: 600px) 50vw',
+						'100vw',
+					].join(',');
+				}
+				return null;
+			},
+
+			thumbnailSrc () {
+				// Return 480p as fallback image if possible
+				if (this.video.responsiveThumbnails) {
+					const regex = /^(.+)_1080\.jpg$/;
+					const bigSrc = this.video.thumbnailUrl;
+					if (regex.test(bigSrc)) {
+						const baseSrc = bigSrc.match(regex)[1];
+						return `${baseSrc}_480.jpg`;
+					}
+				}
+				return this.video.thumbnailUrl;
+			},
+
+			thumbnailSrcSet () {
+				if (this.video.responsiveThumbnails) {
+					const regex = /^(.+)_1080\.jpg$/;
+					const bigSrc = this.video.thumbnailUrl;
+					if (regex.test(bigSrc)) {
+						const baseSrc = bigSrc.match(regex)[1];
+						return [
+							`${baseSrc}_240.jpg 240w`,
+							`${baseSrc}_360.jpg 360w`,
+							`${baseSrc}_480.jpg 480w`,
+							`${baseSrc}_720.jpg 720w`,
+							`${baseSrc}_1080.jpg 1080w`,
+						].join(',');
+					}
+				}
+				return null;
+			},
 		},
 	}
 </script>
@@ -87,7 +133,7 @@
 			left: 0;
 			width: 100%;
 			height: 100%;
-			object-fit: contain;
+			object-fit: cover;
 		}
 
 		.duration {

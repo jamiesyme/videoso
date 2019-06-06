@@ -213,6 +213,14 @@
 												v-model="video.thumbnailUrl" />
 										</td>
 									</tr>
+									<tr>
+										<td>Responsive Thumbnails</td>
+										<td>
+											<input
+												type="checkbox"
+												v-model="video.responsiveThumbnails">
+										</td>
+									</tr>
 								</table>
 							</td>
 							<td class="delete-td">
@@ -293,17 +301,18 @@
 				videos: [
 					/**
 					 * @typedef {object} Video
-					 * @property {number} id
-					 * @property {string} title
-					 * @property {string} description
-					 * @property {string} tags - space-separated
-					 * @property {string} publishedAt - YYYY-MM-DDThh:mm
-					 * @property {number} viewCount
-					 * @property {string} category - category.title
-					 * @property {string} author - user.name
-					 * @property {string} duration - mm:ss
-					 * @property {string} videoUrl
-					 * @property {string} thumbnailUrl
+					 * @property {number}  id
+					 * @property {string}  title
+					 * @property {string}  description
+					 * @property {string}  tags - space-separated
+					 * @property {string}  publishedAt - YYYY-MM-DDThh:mm
+					 * @property {number}  viewCount
+					 * @property {string}  category - category.title
+					 * @property {string}  author - user.name
+					 * @property {string}  duration - mm:ss
+					 * @property {string}  videoUrl
+					 * @property {string}  thumbnailUrl
+					 * @property {boolean} responsiveThumbnails
 					 */
 				],
 			};
@@ -336,6 +345,7 @@
 						duration:     dur,
 						videoUrl:     v.videoUrl,
 						thumbnailUrl: v.thumbnailUrl,
+						responsiveThumbnails: v.responsiveThumbnails,
 					};
 				});
 				this.loading = false;
@@ -362,6 +372,7 @@
 						duration:     dur,
 						videoUrl:     v.videoUrl,
 						thumbnailUrl: v.thumbnailUrl,
+						responsiveThumbnails: v.responsiveThumbnails,
 					};
 				});
 				await Content.save();
@@ -435,6 +446,7 @@
 					duration: '00:00',
 					videoUrl: null,
 					thumbnailUrl: null,
+					responsiveThumbnails: false,
 				});
 			},
 
@@ -585,6 +597,12 @@
 				}
 				td:first-of-type {
 					width: 20rem;
+				}
+				input[type="checkbox"] {
+					display: block;
+					width: 2.4rem;
+					height: 2.4rem;
+					margin: 0.2rem 0;
 				}
 			}
 		}
