@@ -5,10 +5,11 @@
 				class="category"
 				v-for="category in categories">
 				<h2>{{ category.title }}</h2>
-				<div class="video-list">
+				<div :class="videoListClasses">
 					<VideoLink
 						:video="video"
 						:key="video.id"
+						:extraWidth="videoLinkExtraWidth"
 						v-for="video in category.videos">
 					</VideoLink>
 				</div>
@@ -68,15 +69,26 @@
 					return Object.assign({}, cat, { videos });
 				});
 			},
+
+			videoListClasses () {
+				return {
+					'video-list': true,
+					'video-list-multi': this.$breakpoint.name !== 'small',
+				};
+			},
+
+			videoLinkExtraWidth () {
+				if (this.$breakpoint.name === 'small') {
+					return '4rem';
+				} else {
+					return null;
+				}
+			},
 		},
 	}
 </script>
 
 <style lang="scss" scoped>
-	.container {
-		padding: 0;
-	}
-
 	.category {
 		margin: 2rem 0;
 
@@ -96,9 +108,13 @@
 
 		.video-list {
 			display: grid;
-			grid-template-columns: 1fr 1fr 1fr 1fr;
-			grid-column-gap: 0.4rem;
+			grid-template-columns: 1fr;
 			grid-row-gap: 2.4rem;
+
+			&.video-list-multi {
+				grid-column-gap: 0.4rem;
+				grid-template-columns: 1fr 1fr 1fr 1fr;
+			}
 		}
 	}
 </style>

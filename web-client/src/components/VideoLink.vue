@@ -2,7 +2,9 @@
 	<router-link
 		class="video-link"
 		:to="`/video/${video.id}`">
-		<div class="aspect-16-9">
+		<div
+			class="thumbnail-wrapper aspect-16-9"
+			:style="extraStyle">
 			<img :src="video.thumbnailUrl">
 			<div class="duration">
 				{{ formatDuration(video.duration) }}
@@ -30,6 +32,12 @@
 			 * @property {string} author.name
 			 */
 			video: Object,
+
+			/**
+			 * Use on mobile to stretch thumbnail to edges of screen.
+			 * @param {string} extraWidth - '10px', '2rem', etc.
+			 */
+			extraWidth: String,
 		},
 
 		methods: {
@@ -47,6 +55,18 @@
 				}
 			},
 		},
+
+		computed: {
+			extraStyle () {
+				if (this.extraWidth) {
+					return {
+						marginLeft: `calc(-0.5 * ${this.extraWidth})`,
+						width: `calc(100% + ${this.extraWidth})`,
+					};
+				}
+				return null;
+			},
+		},
 	}
 </script>
 
@@ -55,7 +75,7 @@
 		display: block;
 	}
 
-	.aspect-16-9 {
+	.thumbnail-wrapper {
 		background-color: black;
 		position: relative;
 
@@ -69,8 +89,8 @@
 		}
 
 		.duration {
-			background-color: rgba(0, 0, 0, 0.6);
-			color: rgba(255, 255, 255, 0.8);
+			background-color: rgba(0, 0, 0, 0.8);
+			color: rgba(255, 255, 255, 0.9);
 			position: absolute;
 			bottom: 0.4rem;
 			right: 0.4rem;

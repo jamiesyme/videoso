@@ -55,11 +55,12 @@
 		border-bottom: 0.1rem solid #d6d6d6;
 	}
 
+	.container {
+		display: flex;
+	}
+
 	.logo-wrapper {
-		position: absolute;
-		left: 0;
-		width: 25%;
-		padding: 0 0 0 0.4rem;
+		flex: 1 1 25%;
 
 		a {
 			display: block;
@@ -73,14 +74,12 @@
 			height: 14rem;
 			position: relative;
 			top: -3.4rem;
-			left: -1rem;
+			left: -1.2rem;
 		}
 	}
 
 	.search-wrapper {
-		position: absolute;
-		left: 25%;
-		width: 50%;
+		flex: 1 1 50%;
 
 		input {
 			margin: 0;
@@ -93,9 +92,7 @@
 	}
 
 	.login-wrapper {
-		position: absolute;
-		right: 0;
-		width: 25%;
+		flex: 1 1 25%;
 		padding: 0 0.4rem 0 0;
 		font-weight: bold;
 		text-align: right;
