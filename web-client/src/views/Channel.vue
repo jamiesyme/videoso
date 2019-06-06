@@ -8,21 +8,27 @@
 				<h1>{{ user.name }}'s Channel</h1>
 			</div>
 		</section>
-		<div class="container" v-if="userVideos.length > 0">
+		<div
+			:class="containerClasses"
+			v-if="userVideos.length > 0">
 			<section class="video-section">
 				<VideoViewer
 					:video="primaryVideo"
+					:extraWidth="videoViewerExtraWidth"
 					v-if="primaryVideo">
 				</VideoViewer>
 				<hr>
 			</section>
-			<section class="related-section">
+			<section class="other-videos-section">
 				<h2>Other Videos</h2>
-				<VideoLink
-					:video="video"
-					:key="video.id"
-					v-for="video in otherVideos">
-				</VideoLink>
+				<div :class="otherVideoListClasses">
+					<VideoLink
+						:video="video"
+						:extraWidth="otherVideoLinkExtraWidth"
+						:key="video.id"
+						v-for="video in otherVideos">
+					</VideoLink>
+				</div>
 				<hr>
 			</section>
 		</div>
@@ -123,21 +129,50 @@
 			otherVideos () {
 				return this.userVideos.slice(1);
 			},
+
+			containerClasses () {
+				const bp = this.$breakpoint.name;
+				const multi = bp !== 'small' && bp !== 'medium';
+				return {
+					'container': true,
+					'container-multi-column': multi,
+				};
+			},
+
+			videoViewerExtraWidth () {
+				const bp = this.$breakpoint.name;
+				const extra = bp === 'small' || bp === 'medium';
+				return extra ? '4rem' : null;
+			},
+
+			otherVideoListClasses () {
+				const bp = this.$breakpoint.name;
+				const multi = bp === 'medium';
+				return {
+					'video-list': true,
+					'video-list-multi': multi,
+				};
+			},
+
+			otherVideoLinkExtraWidth () {
+				const bp = this.$breakpoint.name;
+				const extra = bp === 'small';
+				return extra ? '4rem' : null;
+			},
 		},
 	}
 </script>
 
 <style lang="scss" scoped>
-	.container {
-		display: flex;
-		padding: 0;
-		margin: 4rem auto 6rem;
+	.channel-view {
+		margin: 0 0 6rem;
 	}
 
 	.banner-section {
 		height: 20rem;
 		position: relative;
 		border-bottom: 0.1rem solid #d6d6d6;
+		margin: 0 0 4rem;
 
 		img {
 			position: absolute;
@@ -163,28 +198,43 @@
 			margin: 0 auto;
 			height: 100%;
 			z-index: 100;
-			padding: 10rem 0 0;
 			display: block;
+			position: relative;
 
 			h1 {
 				color: #eee;
+				position: absolute;
+				left: 0;
+				bottom: 2rem;
+				padding: 2rem;
+				margin: 0;
 			}
 		}
 	}
 
-	.video-section {
-		flex: 1 1 75%;
+	.container.container-multi-column {
+		display: grid;
+		grid-template-columns: 3fr 1fr;
+		grid-column-gap: 3rem;
 	}
 
-	.related-section {
-		flex: 1 1 25%;
-		padding: 0 0 0 3rem;
-
+	.other-videos-section {
 		h2 {
 			font-size: 2.2rem;
 			letter-spacing: -0.08rem;
 			line-height: 1.35;
 			margin-bottom: 1.5rem;
+		}
+
+		.video-list {
+			display: grid;
+			grid-template-columns: 1fr;
+			grid-row-gap: 2.4rem;
+
+			&.video-list-multi {
+				grid-column-gap: 0.4rem;
+				grid-template-columns: 1fr 1fr;
+			}
 		}
 	}
 </style>
