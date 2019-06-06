@@ -4,7 +4,7 @@
 		:to="`/video/${video.id}`">
 		<div
 			class="thumbnail-wrapper aspect-16-9"
-			:style="extraStyle">
+			:style="thumbnailStyle">
 			<img :src="video.thumbnailUrl">
 			<div class="duration">
 				{{ formatDuration(video.duration) }}
@@ -57,11 +57,13 @@
 		},
 
 		computed: {
-			extraStyle () {
+			thumbnailStyle () {
 				if (this.extraWidth) {
 					return {
 						marginLeft: `calc(-0.5 * ${this.extraWidth})`,
 						width: `calc(100% + ${this.extraWidth})`,
+						borderTop: '0.1rem solid #eee',
+						borderBottom: '0.1rem solid #eee',
 					};
 				}
 				return null;

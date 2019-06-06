@@ -7,10 +7,11 @@
 			<h1 v-else>
 				No search results for: {{ query }}
 			</h1>
-			<div class="video-list">
+			<div :class="videoListClasses">
 				<VideoLink
 					:video="video"
 					:key="video.id"
+					:extraWidth="videoLinkExtraWidth"
 					v-for="video in videos">
 				</VideoLink>
 			</div>
@@ -107,14 +108,28 @@
 					);
 				});
 			},
+
+			videoListClasses () {
+				return {
+					'video-list': true,
+					'video-list-multi': this.$breakpoint.name !== 'small',
+				};
+			},
+
+			videoLinkExtraWidth () {
+				if (this.$breakpoint.name === 'small') {
+					return '4rem';
+				} else {
+					return null;
+				}
+			},
 		},
 	}
 </script>
 
 <style lang="scss" scoped>
-	.container {
-		padding: 0;
-		margin: 4rem auto 6rem;
+	.search-view {
+		margin: 4rem 0 6rem;
 	}
 
 	h1 {
@@ -125,8 +140,13 @@
 
 	.video-list {
 		display: grid;
-		grid-template-columns: 1fr 1fr 1fr 1fr;
-		grid-column-gap: 0.4rem;
-		grid-row-gap: 2.4rem;
+		grid-template-columns: 1fr;
+		grid-row-gap: 4rem;
+
+		&.video-list-multi {
+			grid-column-gap: 0.4rem;
+			grid-row-gap: 2.4rem;
+			grid-template-columns: 1fr 1fr 1fr 1fr;
+		}
 	}
 </style>
