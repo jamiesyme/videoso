@@ -325,7 +325,7 @@
 		methods: {
 			async loadContent () {
 				this.loading = true;
-				await Content.load();
+				await Content.load({ fresh: true });
 				this.categories = Content.categories.slice();
 				this.users = Content.users.slice();
 				this.videos = Content.videos.map(v => {

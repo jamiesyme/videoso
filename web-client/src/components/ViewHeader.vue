@@ -1,6 +1,6 @@
 <template>
 	<header class="view-header">
-		<div class="container">
+		<div :class="containerClasses">
 			<div class="logo-wrapper">
 				<router-link to="/">
 					<img
@@ -8,14 +8,29 @@
 						alt="Videoso logo">
 				</router-link>
 			</div>
+			<div
+				class="flex-grow"
+				v-if="!isLargeContainer()">
+			</div>
 			<form
 				class="search-wrapper"
 				@submit.prevent="goToSearch()">
+				<button
+					type="button"
+					class="condensed-search-button button button-clear"
+					@click="activateSearch()">
+					<IonSearch />
+				</button>
+				<div
+					class="search-input-bg"
+					v-show="searchActive">
+				</div>
 				<input
 					type="text"
 					ref="searchInput"
 					placeholder="Search"
-					v-show="showSearch">
+					:class="searchInputClasses"
+					@blur="onSearchBlur()">
 			</form>
 			<div class="login-wrapper">
 				<router-link
@@ -36,17 +51,40 @@
 </template>
 
 <script>
+	import IonSearch from 'vue-ionicons/dist/md-search';
 	import Auth from '@/auth';
 
 	export default {
-		props: {
-			showSearch: {
-				type: Boolean,
-				default: true,
-			},
+		components: {
+			IonSearch,
+		},
+
+		data () {
+			return {
+				searchActive: false,
+			};
 		},
 
 		methods: {
+			activateSearch () {
+				this.searchActive = true;
+				this.$nextTick(() => {
+					const elem = this.$refs.searchInput;
+					if (elem) {
+						elem.focus();
+					}
+				});
+			},
+
+			onSearchBlur () {
+				this.searchActive = false;
+			},
+
+			isLargeContainer () {
+				const bp = this.$breakpoint.name;
+				return bp === 'large' || bp === 'xlarge';
+			},
+
 			goToSearch () {
 				const q = this.$refs.searchInput.value;
 				if (q) {
@@ -70,6 +108,19 @@
 			loggedIn () {
 				return Auth.loggedIn();
 			},
+
+			containerClasses () {
+				return {
+					'container': true,
+					'large-container': this.isLargeContainer(),
+				};
+			},
+
+			searchInputClasses () {
+				return {
+					active: this.searchActive,
+				};
+			},
 		},
 	}
 </script>
@@ -85,9 +136,11 @@
 		display: flex;
 	}
 
-	.logo-wrapper {
-		flex: 1 1 25%;
+	.flex-grow {
+		flex: 1;
+	}
 
+	.logo-wrapper {
 		a {
 			display: block;
 			width: 14rem;
@@ -105,26 +158,82 @@
 	}
 
 	.search-wrapper {
-		flex: 1 1 50%;
+		display: flex;
+		align-items: center;
+		margin: 0;
 
 		input {
+			display: none;
 			margin: 0;
 			background-color: #fafafa;
+			z-index: 100;
 
 			&:focus {
 				background-color: white;
 			}
+
+			&.active {
+				display: block;
+				position: absolute;
+				left: 1rem;
+				width: calc(100% - 2rem);
+			}
+		}
+
+		.search-input-bg {
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0.1rem;
+			background-color: white;
+			z-index: 99;
+		}
+
+		.condensed-search-button {
+			font-size: 2.0rem;
+			padding: 0.3rem 1rem 0;
+			margin: 0 0.5rem;
 		}
 	}
 
 	.login-wrapper {
-		flex: 1 1 25%;
 		padding: 0 0.4rem 0 0;
 		font-weight: bold;
 		text-align: right;
 
 		.button {
 			padding: 0 1rem;
+		}
+	}
+
+	.large-container {
+		.logo-wrapper {
+			flex: 1 1 25%;
+		}
+
+		.search-wrapper {
+			flex: 1 1 50%;
+
+			input {
+				display: block;
+
+				&.active {
+					position: static;
+				}
+			}
+
+			.search-input-bg {
+				display: none;
+			}
+
+			.condensed-search-button {
+				display: none;
+			}
+		}
+
+		.login-wrapper {
+			flex: 1 1 25%;
 		}
 	}
 </style>
