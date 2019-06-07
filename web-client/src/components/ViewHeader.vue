@@ -22,15 +22,15 @@
 					<IonSearch />
 				</button>
 				<div
-					class="search-input-bg"
-					v-show="searchActive">
+					:class="searchInputWrapperClasses"
+					v-show="showSearchInput">
+					<IonSearch />
+					<input
+						type="text"
+						ref="searchInput"
+						placeholder="Search"
+						@blur="onSearchBlur()">
 				</div>
-				<input
-					type="text"
-					ref="searchInput"
-					placeholder="Search"
-					:class="searchInputClasses"
-					@blur="onSearchBlur()">
 			</form>
 			<div class="login-wrapper">
 				<router-link
@@ -92,8 +92,10 @@
 						path: '/search',
 						query: { q },
 					});
-					this.$refs.searchInput.blur();
+				} else if (this.$route.path !== '/') {
+					this.$router.push('/');
 				}
+				this.$refs.searchInput.blur();
 			},
 
 			logout () {
@@ -116,10 +118,15 @@
 				};
 			},
 
-			searchInputClasses () {
+			searchInputWrapperClasses () {
 				return {
-					active: this.searchActive,
+					'search-input-wrapper': true,
+					'full-width': !this.isLargeContainer(),
 				};
+			},
+
+			showSearchInput () {
+				return this.searchActive || this.isLargeContainer();
 			},
 		},
 	}
@@ -162,32 +169,36 @@
 		align-items: center;
 		margin: 0;
 
-		input {
-			display: none;
-			margin: 0;
-			background-color: #fafafa;
-			z-index: 100;
+		.search-input-wrapper {
+			width: 100%;
 
-			&:focus {
+			&.full-width {
+				position: absolute;
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0.1rem;
+				padding: 0 1.4rem;
 				background-color: white;
 			}
 
-			&.active {
-				display: block;
+			.ion {
+				color: #999;
 				position: absolute;
-				left: 1rem;
-				width: calc(100% - 2rem);
+				font-size: 2.0rem;
+				top: 2.6rem;
+				right: 2.4rem;
 			}
-		}
 
-		.search-input-bg {
-			position: absolute;
-			top: 0;
-			left: 0;
-			right: 0;
-			bottom: 0.1rem;
-			background-color: white;
-			z-index: 99;
+			input {
+				margin-bottom: 0;
+				background-color: #fafafa;
+				padding-right: 3.8rem;
+
+				&:focus {
+					background-color: white;
+				}
+			}
 		}
 
 		.condensed-search-button {
@@ -215,16 +226,16 @@
 		.search-wrapper {
 			flex: 1 1 50%;
 
-			input {
-				display: block;
+			.search-input-wrapper {
+				position: relative;
 
-				&.active {
-					position: static;
+				.ion {
+					right: 1.0rem;
 				}
-			}
 
-			.search-input-bg {
-				display: none;
+				input {
+					padding-right: 3.8rem;
+				}
 			}
 
 			.condensed-search-button {
