@@ -1,6 +1,24 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-import Home from './views/Home.vue';
+import Auth from '@/auth';
+import HomeView from '@/views/Home.vue';
+
+const views = {
+	home:    HomeView,
+	channel: () => import('@/views/Channel'),
+	viewer:  () => import('@/views/Viewer'),
+	search:  () => import('@/views/Search'),
+	login:   () => import('@/views/Login'),
+	admin:   () => import('@/views/Admin'),
+};
+
+function requireAuth (to, from, next) {
+	if (Auth.loggedIn()) {
+		next();
+	} else {
+		next('/login');
+	}
+}
 
 Vue.use(Router);
 
@@ -10,65 +28,58 @@ export default new Router({
 	routes: [
 		{
 			path: '/',
-			name: 'home',
-			component: Home
+			component: views.home,
 		},
 		{
 			path: '/video/:videoId',
-			name: 'viewer',
-			component: () => import(/* webpackChunkName: "viewer" */ '@/views/Viewer')
+			component: views.viewer,
 		},
 		{
 			path: '/channel/:userName',
-			name: 'channel',
-			component: () => import(/* webpackChunkName: "channel" */ '@/views/Channel')
+			component: views.channel,
 		},
 		{
 			path: '/search',
-			name: 'search',
-			component: () => import(/* webpackChunkName: "search" */ '@/views/Search')
+			component: views.search,
 		},
 		{
 			path: '/login',
-			name: 'login',
-			component: () => import(/* webpackChunkName: "login" */ '@/views/Login')
+			component: views.login,
+			beforeEnter: (to, from, next) => {
+				if (Auth.loggedIn()) {
+					next('/admin');
+				} else {
+					next();
+				}
+			},
 		},
 		{
 			path: '/admin',
-			name: 'admin',
-			redirect: '/admin/categories'
+			redirect: '/admin/categories',
 		},
 		{
 			path: '/admin/categories',
-			name: 'admin-categories',
-			component: () => import(/* webpackChunkName: "admin" */ '@/views/Admin'),
+			component: views.admin,
 			props: {
 				section: 'categories',
 			},
+			beforeEnter: requireAuth,
 		},
 		{
 			path: '/admin/users',
-			name: 'admin-users',
-			component: () => import(/* webpackChunkName: "admin" */ '@/views/Admin'),
+			component: views.admin,
 			props: {
 				section: 'users',
 			},
+			beforeEnter: requireAuth,
 		},
 		{
 			path: '/admin/videos',
-			name: 'admin-videos',
-			component: () => import(/* webpackChunkName: "admin" */ '@/views/Admin'),
+			component: views.admin,
 			props: {
 				section: 'videos',
 			},
+			beforeEnter: requireAuth,
 		},
-		/*{
-			path: '/about',
-			name: 'about',
-			// route level code-splitting
-			// this generates a separate chunk (about.[hash].js) for this route
-			// which is lazy-loaded when the route is visited.
-			component: () => import(/* webpackChunkName: "about" * / './views/About.vue')
-		},*/
 	],
 });

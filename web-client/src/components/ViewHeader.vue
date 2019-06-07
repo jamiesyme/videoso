@@ -3,7 +3,9 @@
 		<div class="container">
 			<div class="logo-wrapper">
 				<router-link to="/">
-					<img alt="Videoso logo" src="@/assets/logo.png">
+					<img
+						src="@/assets/logo.png"
+						alt="Videoso logo">
 				</router-link>
 			</div>
 			<form
@@ -16,15 +18,26 @@
 					v-show="showSearch">
 			</form>
 			<div class="login-wrapper">
-				<router-link to="/login" class="button button-clear">
+				<router-link
+					to="/login"
+					class="button button-clear"
+					v-if="!loggedIn">
 					Log in
 				</router-link>
+				<button
+					class="button button-clear"
+					@click="logout()"
+					v-else>
+					Log out
+				</button>
 			</div>
 		</div>
 	</header>
 </template>
 
 <script>
+	import Auth from '@/auth';
+
 	export default {
 		props: {
 			showSearch: {
@@ -43,6 +56,19 @@
 					});
 					this.$refs.searchInput.blur();
 				}
+			},
+
+			logout () {
+				Auth.logout();
+				if (this.$route.path.indexOf('/admin') === 0) {
+					this.$router.push('/');
+				}
+			},
+		},
+
+		computed: {
+			loggedIn () {
+				return Auth.loggedIn();
 			},
 		},
 	}

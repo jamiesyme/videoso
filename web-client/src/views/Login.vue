@@ -4,10 +4,19 @@
 			<div :class="shortContainerClasses">
 				<div>
 					<h2>Log In</h2>
-					<form @submit.prevent="goToAdmin()">
-						<input type="email" placeholder="Email address">
-						<input type="password" placeholder="Password">
-						<button type="submit">Log in</button>
+					<form @submit.prevent="submitCreds()">
+						<input
+							type="email"
+							placeholder="Email address"
+							v-model="email">
+						<input
+							type="password"
+							placeholder="Password"
+							v-model="password">
+						<div class="submit-area">
+							<div class="status">{{ status || '' }}</div>
+							<button type="submit">Log in</button>
+						</div>
 					</form>
 				</div>
 
@@ -23,10 +32,33 @@
 </template>
 
 <script>
+	import Auth from '@/auth';
+
 	export default {
+		data () {
+			return {
+				email: '',
+				password: '',
+				status: null,
+			};
+		},
+
 		methods: {
 			goToAdmin () {
 				this.$router.push('admin');
+			},
+
+			submitCreds () {
+				if (Auth.login(this.email, this.password)) {
+					this.goToAdmin();
+				} else {
+					// Add a slight delay so that on subsequent attempts there is
+					// still an indication that the credentials are being tried.
+					this.status = null;
+					setTimeout(() => {
+						this.status = 'Invalid credentials';
+					}, 250);
+				}
 			},
 		},
 
@@ -56,10 +88,22 @@
 		margin: 0 0 2rem;
 	}
 
-	button {
-		display: block;
-		width: 10rem;
-		margin: 0 0 0 auto;
+	.submit-area {
+		display: flex;
+
+		.status {
+			flex: 1;
+			line-height: 3.8rem;
+			font-weight: bold;
+			font-size: 1.4rem;
+			color: #ff0033;
+		}
+
+		button {
+			display: block;
+			width: 10rem;
+			margin: 0 0 0 auto;
+		}
 	}
 
 	.note {
