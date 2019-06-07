@@ -45,24 +45,14 @@
 	import VideoLink from '@/components/VideoLink';
 	import VideoViewer from '@/components/VideoViewer';
 
+	function expandVideo (video) {
+		return ContentUtils.expandVideo(Content, video);
+	}
+
 	export default {
 		components: {
 			VideoLink,
 			VideoViewer,
-		},
-
-		data () {
-			return {
-				content: null,
-			};
-		},
-
-		async mounted () {
-			// Load content (if hasn't already been loaded)
-			if (Content.users.length === 0) {
-				await Content.load();
-			}
-			this.content = Content;
 		},
 
 		computed: {
@@ -76,11 +66,8 @@
 				if (!this.userName) {
 					return null;
 				}
-				if (!this.content) {
-					return null;
-				}
 
-				const user = this.content.users.find(user => {
+				const user = Content.users.find(user => {
 					function tr (str) {
 						return str.trim().toLowerCase();
 					}
@@ -103,18 +90,15 @@
 				if (!this.user) {
 					return [];
 				}
-				if (!this.content) {
-					return [];
-				}
 
-				return this.content.videos.filter(vid => {
+				return Content.videos.filter(vid => {
 					return vid.author === this.user.id;
 				}).map(vid => {
 					return Object.assign(
 						{
 							thumbnailUrl: dummyThumbUrl,
 						},
-						ContentUtils.expandVideo(this.content, vid),
+						expandVideo(vid),
 						{
 							publishedAt: new Date(vid.publishedAt),
 						},

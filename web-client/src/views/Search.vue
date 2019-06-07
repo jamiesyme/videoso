@@ -25,23 +25,13 @@
 	import ContentUtils from '@/utils/content';
 	import VideoLink from '@/components/VideoLink';
 
+	function expandVideo (video) {
+		return ContentUtils.expandVideo(Content, video);
+	}
+
 	export default {
 		components: {
 			VideoLink,
-		},
-
-		data () {
-			return {
-				content: null,
-			};
-		},
-
-		async mounted () {
-			// Load content (if hasn't already been loaded)
-			if (Content.videos.length === 0) {
-				await Content.load();
-			}
-			this.content = Content;
 		},
 
 		computed: {
@@ -50,10 +40,6 @@
 			},
 
 			searchIndex () {
-				if (!this.content) {
-					return null;
-				}
-
 				const searchIndex = new FlexSearch('match', {
 					doc: {
 						id: 'id',
@@ -66,8 +52,8 @@
 						],
 					},
 				});
-				searchIndex.add(this.content.videos.map(vid => {
-					const fullVid = ContentUtils.expandVideo(this.content, vid);
+				searchIndex.add(Content.videos.map(vid => {
+					const fullVid = expandVideo(vid);
 					return {
 						id:          fullVid.id,
 						title:       fullVid.title,
@@ -83,25 +69,17 @@
 			videos () {
 				const dummyThumbUrl = 'https://dummyimage.com/200x112/000/fff';
 
-				// We need an index (and content) to search
-				if (!this.searchIndex) {
-					return [];
-				}
-				if (!this.content) {
-					return [];
-				}
-
 				// Search videos
 				const results = this.searchIndex.search(this.query);
 
 				// Translate search results
 				return results.map(searchVid => {
-					const vid = this.content.videos.find(v => v.id === searchVid.id);
+					const vid = Content.videos.find(v => v.id === searchVid.id);
 					return Object.assign(
 						{
 							thumbnailUrl: dummyThumbUrl,
 						},
-						ContentUtils.expandVideo(this.content, vid),
+						expandVideo(vid),
 						{
 							publishedAt: new Date(vid.publishedAt),
 						},

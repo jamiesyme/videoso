@@ -25,6 +25,10 @@
 	import ViewHeader from '@/components/ViewHeader';
 	import VideoLink from '@/components/VideoLink';
 
+	function expandVideo (video) {
+		return ContentUtils.expandVideo(Content, video);
+	}
+
 	export default {
 		name: 'home',
 
@@ -39,31 +43,19 @@
 			};
 		},
 
-		async mounted () {
-			// Load content (if hasn't already been loaded)
-			if (Content.categories.length === 0) {
-				await Content.load();
-			}
-			this.content = Content;
-		},
-
 		computed: {
 			categories () {
 				const dummyThumbUrl = 'https://dummyimage.com/200x112/000/fff';
 
-				if (!this.content) {
-					return [];
-				}
-
-				return this.content.categories.map(cat => {
-					const videos = this.content.videos.filter(vid => {
+				return Content.categories.map(cat => {
+					const videos = Content.videos.filter(vid => {
 						return vid.category === cat.id;
 					}).map(vid => {
 						return Object.assign(
 							{
 								thumbnailUrl: dummyThumbUrl,
 							},
-							ContentUtils.expandVideo(Content, vid),
+							expandVideo(vid),
 						);
 					});
 					return Object.assign({}, cat, { videos });

@@ -1,76 +1,84 @@
+import Vue from 'vue';
 import CacheUtils from '@/utils/cache';
 
-class Content {
-	constructor (dataUrl) {
-		this.categories = [];
-		this.users = [];
-		this.videos = [];
-		this.dataUrl = dataUrl;
-	}
+const dataUrl = process.env.VUE_APP_CONTENT_URL;
 
-	async load (options) {
-		let content;
-		if (!options || !options.fresh) {
-			content = this.getCachedContent();
-		}
-		if (!content) {
-			content = await this.getFreshContent();
-			this.cacheContent(content);
-		}
+const state = Vue.observable({
+	categories: [],
+	users: [],
+	videos: [],
+	load: null,
+	save: null,
+});
 
-		this.categories = content.categories || [];
-		this.users = content.users || [];
-		this.videos = content.videos || [];
-	}
+function cacheContent (content) {
+	const expiresAt = new Date;
+	expiresAt.setTime(expiresAt.getTime() + 60 * 60 * 1000);
+	const cacheObj = {
+		content,
+		expiresAt,
+	};
+	const cacheStr = JSON.stringify(cacheObj);
+	CacheUtils.setItem(dataUrl, cacheStr);
+}
 
-	async save () {
-		CacheUtils.removeItem(this.dataUrl);
-		const res = await fetch(this.dataUrl, {
-			method: 'PUT',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({
-				categories: this.categories,
-				users: this.users,
-				videos: this.videos,
-			}),
-		});
-		if (!res.ok) {
-			console.err(res);
-			throw new Error('failed to save content');
+function getCachedContent () {
+	if (CacheUtils.hasItem(dataUrl)) {
+		const cacheStr = CacheUtils.getItem(dataUrl);
+		const cacheObj = JSON.parse(cacheStr);
+		if ((new Date).toISOString() < cacheObj.expiresAt) {
+			return cacheObj.content;
+		} else {
+			CacheUtils.removeItem(dataUrl);
 		}
 	}
+	return null;
+}
 
-	getCachedContent () {
-		if (CacheUtils.hasItem(this.dataUrl)) {
-			const cacheStr = CacheUtils.getItem(this.dataUrl);
-			const cacheObj = JSON.parse(cacheStr);
-			if ((new Date).toISOString() < cacheObj.expiresAt) {
-				return cacheObj.content;
-			} else {
-				CacheUtils.removeItem(this.dataUrl);
-			}
-		}
-		return null;
+async function getFreshContent () {
+	const res = await fetch(dataUrl);
+	if (!res.ok) {
+		console.err(res);
+		throw new Error('failed to load content');
+	}
+	return await res.json();
+}
+
+async function load (options) {
+	let content;
+	if (!options || !options.fresh) {
+		content = getCachedContent();
+	}
+	if (!content) {
+		content = await getFreshContent();
+		cacheContent(content);
 	}
 
-	cacheContent (content) {
-		const expiresAt = new Date;
-		expiresAt.setTime(expiresAt.getTime() + 60 * 60 * 1000);
-		const cacheObj = { content, expiresAt };
-		const cacheStr = JSON.stringify(cacheObj);
-		CacheUtils.setItem(this.dataUrl, cacheStr);
-	}
+	state.categories = content.categories || [];
+	state.users      = content.users || [];
+	state.videos     = content.videos || [];
+}
 
-	async getFreshContent () {
-		const res = await fetch(this.dataUrl);
-		if (!res.ok) {
-			console.err(res);
-			throw new Error('failed to load content');
-		}
-		return await res.json();
+async function save () {
+	CacheUtils.removeItem(dataUrl);
+	const res = await fetch(dataUrl, {
+		method: 'PUT',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({
+			categories: state.categories,
+			users:      state.users,
+			videos:     state.videos,
+		}),
+	});
+	if (!res.ok) {
+		console.err(res);
+		throw new Error('failed to save content');
 	}
 }
 
-export default new Content(process.env.VUE_APP_CONTENT_URL);
+state.load = load;
+state.save = save;
+
+export default state;

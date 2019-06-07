@@ -34,24 +34,14 @@
 	import VideoLink from '@/components/VideoLink';
 	import VideoViewer from '@/components/VideoViewer';
 
+	function expandVideo (video) {
+		return ContentUtils.expandVideo(Content, video);
+	}
+
 	export default {
 		components: {
 			VideoLink,
 			VideoViewer,
-		},
-
-		data () {
-			return {
-				content: null,
-			};
-		},
-
-		async mounted () {
-			// Load content (if hasn't already been loaded)
-			if (Content.videos.length === 0) {
-				await Content.load();
-			}
-			this.content = Content;
 		},
 
 		computed: {
@@ -63,15 +53,13 @@
 				if (!this.videoId) {
 					return null;
 				}
-				if (!this.content) {
-					return null;
-				}
 
-				const video = this.content.videos.find(vid => {
+				const video = Content.videos.find(vid => {
 					return vid.id == this.videoId;
 				});
+
 				return Object.assign(
-					ContentUtils.expandVideo(this.content, video),
+					expandVideo(video),
 					{
 						publishedAt: new Date(video.publishedAt),
 					},
@@ -84,11 +72,8 @@
 				if (!this.videoId) {
 					return null;
 				}
-				if (!this.content) {
-					return null;
-				}
 
-				return this.content.videos.filter(vid => {
+				return Content.videos.filter(vid => {
 					const sameId = vid.id === this.video.id;
 					const sameCat = vid.category === this.video.category.id;
 					return !sameId && sameCat;
@@ -97,7 +82,7 @@
 						{
 							thumbnailUrl: dummyThumbUrl,
 						},
-						ContentUtils.expandVideo(this.content, vid),
+						expandVideo(vid),
 					);
 				});
 			},
