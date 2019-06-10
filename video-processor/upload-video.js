@@ -22,7 +22,8 @@ async function initB2 () {
 async function processVideo (videoPath, dashDir) {
 
 	// Transcode
-	const localVideoPath = `${dashDir}/input.mp4`;
+	const ext = videoPath.match(/\.(.*)$/)[1];
+	const localVideoPath = `${dashDir}/input.${ext}`;
 	await fs.symlink(videoPath, localVideoPath);
 	await exec(`./transcode-video.sh "${localVideoPath}"`);
 
