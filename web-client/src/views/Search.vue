@@ -2,7 +2,7 @@
 	<div class="search-view">
 		<div class="container">
 			<h1 v-if="videos.length > 0">
-				Showing search results for: {{ query }}
+				Showing search results for: <strong>{{ query }}</strong>
 			</h1>
 			<h1 v-else>
 				No search results for: {{ query }}
@@ -116,7 +116,8 @@
 
 	h1 {
 		font-size: 2.4rem;
-		line-height: 1.3;
+		letter-spacing: -0.08rem;
+		line-height: 1.35;
 		margin: 3rem 0;
 	}
 

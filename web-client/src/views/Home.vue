@@ -98,6 +98,10 @@
 			}
 		}
 
+		h2 {
+			margin: 0 0 3rem;
+		}
+
 		hr {
 			margin: 6rem 0 2rem;
 		}

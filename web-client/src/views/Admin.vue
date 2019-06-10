@@ -329,6 +329,12 @@
 				this.categories = Content.categories.slice();
 				this.users = Content.users.slice();
 				this.videos = Content.videos.map(v => {
+					// When we load videos, we have to translate a couple fields.
+					// Sometimes this involves denormalizing info (as is the case
+					// with the `category` field), but in return, we can re-use
+					// existing input elements that work with simple strings,
+					// etc. rather than building custom input elements for each
+					// type of input.
 					const pub = new Date(Date.parse(v.publishedAt));
 					const cat = this.categories.find(c => c.id === v.category);
 					const usr = this.users.find(u => u.id === v.author);
@@ -356,6 +362,10 @@
 				Content.categories = this.categories.slice();
 				Content.users = this.users.slice();
 				Content.videos = this.videos.map(v => {
+					// While editing videos we use an intermediate format (see
+					// justification above), so before we save the videos we have
+					// to translate all of the fields back to their normalized
+					// values.
 					const pub = v.publishedAt.toISOString();
 					const cat = this.findCategoryByTitle(v.category);
 					const usr = this.findUserByName(v.author);
@@ -506,6 +516,54 @@
 				return (hrs * 60 + mins) * 60 + secs;
 			},
 		},
+
+		computed: {
+			// Exists solely so that we can easily watch for changes to category
+			// titles.
+			categoriesByTitle () {
+				const obj = {};
+				for (const cat of this.categories) {
+					obj[cat.title] = cat.id;
+				}
+				return obj;
+			},
+
+			// Exists solely so that we can easily watch for changes to user
+			// names.
+			usersByName () {
+				const obj = {};
+				for (const user of this.users) {
+					obj[user.name] = user.id;
+				}
+				return obj;
+			},
+		},
+
+		watch: {
+			categoriesByTitle: function (newValues, oldValues) {
+				// Videos track their category by title, not id, so we need to
+				// keep those values up to date when a category's name changes.
+				for (const video of this.videos) {
+					const catId = oldValues[video.category];
+					const cat = this.categories.find(c => c.id === catId);
+					if (cat) {
+						video.category = cat.title;
+					}
+				}
+			},
+
+			usersByName: function (newValues, oldValues) {
+				// Videos track their author by name, not id, so we need to keep
+				// those values up to date when a user's name changes.
+				for (const video of this.videos) {
+					const userId = oldValues[video.author];
+					const user = this.users.find(u => u.id === userId);
+					if (user) {
+						video.author = user.name;
+					}
+				}
+			},
+		},
 	}
 </script>
 
@@ -592,6 +650,7 @@
 			.video table {
 				padding-left: 2.5rem;
 				margin-bottom: 0;
+				table-layout: fixed;
 				td {
 					border: none;
 				}
