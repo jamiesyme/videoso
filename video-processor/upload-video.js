@@ -25,7 +25,11 @@ async function processVideo (videoPath, dashDir) {
 	const ext = videoPath.match(/\.(.*)$/)[1];
 	const localVideoPath = `${dashDir}/input.${ext}`;
 	await fs.symlink(videoPath, localVideoPath);
-	await exec(`./transcode-video.sh "${localVideoPath}"`);
+	await exec(`./transcode-video.sh "${localVideoPath}"`, {
+		// On longer videos, the stdout buffer is bigger than the default max of
+		// 1 MB, causing the exec() to fail early.
+		maxBuffer: 1024 * 1024 * 32,
+	});
 
 	// Rename transcoded videos
 	const rawTranscodedVideoPaths = [
