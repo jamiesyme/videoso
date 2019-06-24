@@ -82,7 +82,7 @@
 
 		mounted () {
 			this.dash = DashJs.MediaPlayer().create();
-			this.dash.initialize(null, null, false);
+			this.dash.initialize();
 			this.player = new Plyr(this.$refs.video, {
 				controls: [
 					'play-large',
