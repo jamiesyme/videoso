@@ -117,6 +117,19 @@
 				return extra ? '4rem' : null;
 			},
 		},
+
+		watch: {
+			video: {
+				immediate: true,
+				handler: function () {
+					if (this.video) {
+						document.title = `${this.video.title} | Videoso`;
+					} else {
+						document.title = 'Videoso';
+					}
+				},
+			},
+		},
 	}
 </script>
 

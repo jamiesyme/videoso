@@ -106,6 +106,19 @@
 				}
 			},
 		},
+
+		watch: {
+			query: {
+				immediate: true,
+				handler: function () {
+					if (this.query) {
+						document.title = `${this.query} | Videoso`;
+					} else {
+						document.title = `Search | Videoso`;
+					}
+				},
+			},
+		},
 	}
 </script>
 

@@ -43,6 +43,10 @@
 			};
 		},
 
+		mounted () {
+			document.title = 'Videoso';
+		},
+
 		computed: {
 			categories () {
 				const dummyThumbUrl = 'https://dummyimage.com/200x112/000/fff';

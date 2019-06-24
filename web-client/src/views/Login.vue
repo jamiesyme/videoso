@@ -43,6 +43,10 @@
 			};
 		},
 
+		mounted () {
+			document.title = 'Login | Videoso';
+		},
+
 		methods: {
 			goToAdmin () {
 				this.$router.push('admin');

@@ -12,6 +12,13 @@
 					@keydown="checkEnter($event)"
 					@input="$emit('input', dateTimeLocalStrToDate($event.target.value))"
 					v-if="type === 'datetime-local'">
+				<textarea
+					rows="3"
+					:value="value"
+					@keydown="checkEnter($event)"
+					@input="$emit('input', $event.target.value)"
+					v-else-if="type === 'textarea'">
+				</textarea>
 				<input
 					:list="list"
 					:type="type"
@@ -81,7 +88,7 @@
 			},
 
 			checkEnter (ev) {
-				if (ev.key === 'Enter') {
+				if (ev.key === 'Enter' && !ev.shiftKey) {
 					this.stopEditing();
 				}
 			},

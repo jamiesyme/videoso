@@ -25,10 +25,14 @@
 				on
 				{{ formatDate(video.publishedAt) }}
 			</div>
-			<div class="description" v-if="video.description">
-				{{ video.description }}
+			<div
+				class="description"
+				v-html="videoDescriptionHtml"
+				v-if="video.description">
 			</div>
-			<div class="description empty-description" v-else>
+			<div
+				class="description empty-description"
+				v-else>
 				No description.
 			</div>
 		</div>
@@ -38,6 +42,12 @@
 <script>
 	import DashJs from 'dashjs';
 	import Plyr from 'plyr';
+
+	function sanitizeHtml (text) {
+		const temp = document.createElement('div');
+		temp.textContent = text;
+		return temp.innerHTML;
+	}
 
 	export default {
 		name: 'VideoViewer',
@@ -131,6 +141,14 @@
 				}
 				return null;
 			},
+
+			videoDescriptionHtml () {
+				return this.video.description.split('\n\n').map(p => {
+					const safeP = sanitizeHtml(p);
+					const fullP = safeP.trim().replace(/\n/g, '<br>');
+					return `<p>${fullP}</p>`;
+				}).join('');
+			},
 		},
 
 		watch: {
@@ -188,5 +206,12 @@
 		.empty-description {
 			font-style: italic;
 		}
+	}
+</style>
+
+<style lang="scss">
+	// Hack to style the paragraphs that are dynamically inserted
+	.video-viewer .description p {
+		margin-bottom: 1.5rem;
 	}
 </style>

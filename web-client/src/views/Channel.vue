@@ -144,6 +144,19 @@
 				return extra ? '4rem' : null;
 			},
 		},
+
+		watch: {
+			userName: {
+				immediate: true,
+				handler: function () {
+					if (this.userName) {
+						document.title = `${this.userName}'s Channel | Videoso`;
+					} else {
+						document.title = 'Channel | Videoso';
+					}
+				},
+			},
+		},
 	}
 </script>
 

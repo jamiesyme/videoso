@@ -142,7 +142,9 @@
 									<tr>
 										<td>Description</td>
 										<td>
-											<LabelInput v-model="video.description" />
+											<LabelInput
+												type="textarea"
+												v-model="video.description" />
 										</td>
 									</tr>
 									<tr>
@@ -319,6 +321,7 @@
 		},
 
 		async mounted () {
+			document.title = 'Admin | Videoso';
 			await this.loadContent();
 		},
 
